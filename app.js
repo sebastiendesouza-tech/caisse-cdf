@@ -1214,12 +1214,12 @@ function immediateDisplaySubForLine(line) {
 }
 
 
-function compactOrderSubForLine(line) {
-  let text = displaySubForLine(line) || `${euro(line.price)} / unité`;
+function stripDetailCategoryLabels(text) {
+  text = String(text || "");
   const labels = [
     "Entrée", "Plat", "Dessert", "Fromage", "Boisson",
     "Boisson sans alcool", "Boisson alcoolisée",
-    "Viandes", "Accompagnements", "Autre"
+    "Viandes", "Viande", "Accompagnements", "Accompagnement", "Autre"
   ];
   labels.sort((a, b) => b.length - a.length).forEach(label => {
     const escaped = label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -1231,6 +1231,14 @@ function compactOrderSubForLine(line) {
     .replace(/\s*\)/g, ")")
     .replace(/\s{2,}/g, " ")
     .trim();
+}
+
+function compactOrderSubForLine(line) {
+  return stripDetailCategoryLabels(displaySubForLine(line) || `${euro(line.price)} / unité`);
+}
+
+function compactTicketSubForLine(line) {
+  return stripDetailCategoryLabels(immediateSubForLine(line));
 }
 
 function renderCart() {
@@ -1637,7 +1645,7 @@ function delayedRowsForOrder(order) {
 
 function renderTicketHtml(order) {
   const normalLines = (order.lines || []).map(line => {
-    const sub = immediateSubForLine(line);
+    const sub = compactTicketSubForLine(line);
     const onlyDelayed = !sub && Boolean(line.delayedPickup);
     if (onlyDelayed) return "";
     return `

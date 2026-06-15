@@ -872,3 +872,10 @@ th { position: sticky; top: 0; background: #e5e7eb; }
 .history-line-sub { display: block; margin-top: 2px; color: #64748b; font-size: 12px; }
 .ticket-line strong { display: flex; justify-content: space-between; gap: 3mm; }
 .ticket-line strong em { font-style: normal; white-space: nowrap; }
+
+
+/* Impression ticket : réduit les marges navigateur pour éviter la ligne URL en bas */
+@media print {
+  @page { size: A6 portrait; margin: 0; }
+  body.print-ticket .ticket { padding: 4mm; box-sizing: border-box; }
+}
