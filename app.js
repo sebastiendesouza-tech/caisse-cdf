@@ -1733,7 +1733,9 @@ function renderTicketHtml(order) {
 
       <section class="ticket-delayed ticket-delayed-note">
         <h2>À RETIRER PLUS TARD</h2>
-        ${delayedLines || `<div class="ticket-note-line"></div>`}
+        ${delayedLines || ""}
+        <div class="ticket-note-line"></div>
+        <div class="ticket-note-line"></div>
       </section>
     </div>
   `;
