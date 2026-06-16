@@ -361,6 +361,7 @@ function sanitizeProductConfig(config) {
       subCategory: type === "simple" ? String(item.subCategory || "") : "",
       canDelayPickup: false,
       delayedPickup: false,
+      refundable: item.cat !== "Consignes" && Number(item.price) > 0 && item.refundable !== false,
       color: defaultColorForProduct({ ...item, type }),
       components: type === "composite" ? normalizeComponents(item.components) : [],
       options: normalizeOptions(item.options)
@@ -398,6 +399,7 @@ function buildProducts() {
       options: normalizeOptions(item.options),
       canDelayPickup: false,
       delayedPickup: false,
+      refundable: item.cat !== "Consignes" && Number(item.price) > 0 && item.refundable !== false,
       empty: !name
     };
     if (type === "menu") {
@@ -1719,9 +1721,18 @@ function sortedTicketLines(lines) {
     .map(item => item.line);
 }
 
+function ticketNeedsRestField(qty) {
+  return Math.max(1, Number(qty) || 1) > 6;
+}
+
+function ticketRestText(qty) {
+  return ticketNeedsRestField(qty) ? '<span class="ticket-rest-inline">Reste : ___</span>' : '';
+}
+
 function ticketCheckboxes(qty) {
-  const count = Math.max(1, Math.min(20, Number(qty) || 1));
-  return Array.from({ length: count }, () => '<span class="ticket-box">□</span>').join('');
+  const count = Math.max(1, Number(qty) || 1);
+  if (count > 6) return '';
+  return Array.from({ length: count }, () => '<span class="ticket-box"></span>').join('');
 }
 
 function isTicketCheckable(line) {
@@ -1735,7 +1746,8 @@ function isTicketCheckable(line) {
 }
 
 function ticketCheckHtml(qty, enabled = true) {
-  return enabled ? `<span class="ticket-checks">${ticketCheckboxes(qty)}</span>` : `<span class="ticket-checks empty"></span>`;
+  if (!enabled || ticketNeedsRestField(qty)) return `<span class="ticket-checks empty"></span>`;
+  return `<span class="ticket-checks">${ticketCheckboxes(qty)}</span>`;
 }
 
 function selectedSectionForTicket(line, sectionId) {
@@ -1763,7 +1775,7 @@ function menuTicketItems(line) {
         const nestedLine = makeCompositeLine(product, nestedChoice);
         detail = stripDetailCategoryLabels(nestedLine.subImmediate || "");
       }
-      result.push({ qty: amount, name: product?.name || stockItemById(id).name || id, detail });
+      result.push({ qty: amount, name: product?.name || stockItemById(id).name || id, detail, sectionId });
     });
   });
   return result;
@@ -1781,13 +1793,20 @@ function renderTicketLine(line) {
     return `<div class="ticket-line ticket-menu-line">
       <strong><span class="ticket-main">${qty} ${escapeHtml(line.name)}</span><span class="ticket-checks empty"></span><em>${euro(lineTotal)}</em></strong>
       <div class="ticket-menu-items">
-        ${menuItems.map(item => `<div class="ticket-menu-item"><span>${item.qty} ${escapeHtml(item.name)}</span>${ticketCheckHtml(item.qty, true)}</div>${item.detail ? `<div class="ticket-menu-detail">${escapeHtml(item.detail)}</div>` : ""}`).join("")}
+        ${menuItems.map(item => {
+          const label = `${item.qty > 1 ? item.qty + " " : ""}${escapeHtml(item.name)}`;
+          const rest = ticketRestText(item.qty);
+          const detail = item.detail ? `<div class="ticket-menu-detail">(${escapeHtml(item.detail)})</div>` : "";
+          return `<div class="ticket-menu-item"><span>${label}${rest}</span>${ticketCheckHtml(item.qty, true)}</div>${detail}`;
+        }).join("")}
       </div>
     </div>`;
   }
-  return `<div class="ticket-line">
-    <strong><span class="ticket-main">${qty} ${escapeHtml(line.name)}</span>${ticketCheckHtml(qty, checkable)}<em>${euro(lineTotal)}</em></strong>
-    ${sub ? `<span>${escapeHtml(sub)}</span>` : ""}
+  const detail = sub ? `<span class="ticket-line-detail">(${escapeHtml(sub)})</span>` : "";
+  const lineClass = type === "composite" ? "ticket-line ticket-composite-line" : "ticket-line";
+  return `<div class="${lineClass}">
+    <strong><span class="ticket-main">${qty} ${escapeHtml(line.name)}${checkable ? ticketRestText(qty) : ''}</span>${ticketCheckHtml(qty, checkable)}<em>${euro(lineTotal)}</em></strong>
+    ${detail}
   </div>`;
 }
 
@@ -2086,6 +2105,7 @@ function renderSettings() {
           <input class="settings-price" value="${eurosForInput(item.price)}" inputmode="decimal" placeholder="0,00">
           <select class="settings-type">${typeOptions}</select>
           <select class="settings-subcategory" title="Famille" style="display:${type === "simple" && cat !== "Consignes" ? "block" : "none"}">${subCategoryOptions}</select>
+          <label class="settings-refundable" title="Produit remboursable"><input type="checkbox" ${item.cat !== "Consignes" && Number(item.price) > 0 && item.refundable !== false ? "checked" : ""} ${item.cat === "Consignes" || Number(item.price) <= 0 ? "disabled" : ""}> Remb.</label>
           <button class="reset-slot-btn" type="button" data-reset-button="${escapeHtml(item.id)}" title="Réinitialiser ce bouton" aria-label="Réinitialiser ce bouton">↺</button>
         </div>
         
@@ -2198,6 +2218,7 @@ function applySettingsFromDialog() {
     item.type = normalizeType(wrap.querySelector(".settings-type")?.value || "simple");
     item.color = defaultColorForProduct(item);
     item.subCategory = item.type === "simple" && item.cat !== "Consignes" ? String(wrap.querySelector(".settings-subcategory")?.value || "") : "";
+    item.refundable = item.cat !== "Consignes" && Number(item.price) > 0 && Boolean(wrap.querySelector(".settings-refundable input")?.checked);
     item.canDelayPickup = item.cat !== "Consignes" && Boolean(wrap.querySelector(".settings-delayed input")?.checked);
     item.delayedPickup = false;
     if (item.type === "composite" || item.type === "menu") {
@@ -2397,7 +2418,7 @@ function bindSafeTap(button, handler) {
 
 let refundSelection = {};
 function refundableProducts() {
-  return PRODUCTS.filter(p => !p.empty && p.cat !== "Consignes" && Number(p.price) > 0 && normalizeType(p.type) === "simple");
+  return PRODUCTS.filter(p => !p.empty && p.cat !== "Consignes" && Number(p.price) > 0 && p.refundable !== false);
 }
 function refundTotal() {
   return Object.entries(refundSelection).reduce((sum, [id, qty]) => {
