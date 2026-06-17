@@ -1420,7 +1420,7 @@ function buildStandalonePrintHtml(mode, contentHtml) {
       line-height:1.08;
     }
     .ticket h1 { text-align:center; font-size:15pt; margin:0 0 1mm; line-height:1; font-weight:900; }
-    /* v26.19 : rendu iPad calé sur le ticket Mac : titre encadré + corps légèrement agrandi */
+    /* v26.20 : rendu iPad calé sur le ticket Mac : titre encadré + corps légèrement agrandi */
     .ticket-order {
       text-align:center;
       font-size:14pt;
@@ -1483,7 +1483,7 @@ function ensureDirectPrintStyle(mode) {
   if (mode === "print-ticket") {
     style.textContent = `
 @media print {
-  /* v26.19 : nettoyage complet du moteur ticket.
+  /* v26.20 : nettoyage complet du moteur ticket.
      Un seul @page, aucune contre-marge, aucun scale, aucun iframe/fenetre. */
   @page { size: A6 portrait; margin: 0; }
 
@@ -1615,7 +1615,7 @@ function ensureDirectPrintStyle(mode) {
 }
 
 function printCurrentContent(mode) {
-  // v26.19 : retour à l'impression directe de la page principale.
+  // v26.20 : retour à l'impression directe de la page principale.
   // Les versions avec iframe/fenêtre temporaire provoquaient sur iPad le passage A4 -> A6
   // et un ticket visible à la place de l'interface. Ici, seul #printArea est rendu en mode impression.
   ensureDirectPrintStyle(mode);
