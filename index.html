@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Caisse" />
+  <meta name="theme-color" content="#111827" />
+  <title>Caisse manifestation</title>
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="topbar no-print">
+    <div>
+      <h1>Caisse manifestation</h1>
+      <small id="eventName">Manifestation</small>
+    </div>
+    <div class="top-actions">
+      <button id="btnAdmin" class="secondary">Paramètres</button>
+      <button id="btnExport" class="secondary">Export CSV</button>
+    </div>
+  </header>
+
+  <main class="app no-print">
+    <section class="products-zone">
+      <h2>Produits</h2>
+      <div id="categories"></div>
+    </section>
+
+    <section class="cart-zone">
+      <h2>Commande <span id="orderNumber"></span></h2>
+      <div id="cartLines" class="cart-lines empty">Aucun produit</div>
+      <div class="cart-summary">Total commande : <span id="cartTotalBottom">0,00 €</span></div>
+      <div class="cart-actions">
+        <button id="btnClear" class="danger">Annuler</button>
+        <button id="btnPrintTicket" class="secondary">Aperçu ticket</button>
+      </div>
+    </section>
+
+    <section class="payment-zone">
+      <h2>Caisse</h2>
+      <label>Somme payée</label>
+      <div id="amountPaidDisplay" class="paid-display">0,00 €</div>
+
+      <div class="quick-cash">
+        <button data-quick="5">5 €</button>
+        <button data-quick="10">10 €</button>
+        <button data-quick="20">20 €</button>
+        <button data-quick="50">50 €</button>
+        <button id="btnExact" class="exact">Exact</button>
+      </div>
+
+      <div class="keypad">
+        <button data-key="7">7</button>
+        <button data-key="8">8</button>
+        <button data-key="9">9</button>
+        <button data-key="4">4</button>
+        <button data-key="5">5</button>
+        <button data-key="6">6</button>
+        <button data-key="1">1</button>
+        <button data-key="2">2</button>
+        <button data-key="3">3</button>
+        <button data-key="clear" class="key-clear">C</button>
+        <button data-key="0">0</button>
+        <button data-key="back" class="key-back">←</button>
+      </div>
+
+      <label>À rendre</label>
+      <div id="changeDue" class="money change">0,00 €</div>
+
+      <div class="payment-buttons">
+        <button id="payCash" class="pay cash" data-method="Espèces">Espèces</button>
+        <button id="payCard" class="pay card" data-method="CB">CB</button>
+      </div>
+
+      <p class="payment-hint">Clique sur Espèces ou CB pour valider et imprimer.</p>
+    </section>
+  </main>
+
+  <dialog id="adminDialog" class="no-print">
+    <form method="dialog" class="admin">
+      <h2>Paramètres</h2>
+      <label>Nom de la manifestation</label>
+      <input id="adminEventName" />
+      <label>Produits et prix</label>
+      <p class="hint">Une ligne = catégorie;nom;prix. Laisse le nom vide pour garder un bouton vierge. Les rubriques affichées sont Boissons, Restauration et Consignes. Les catégories boissons sans alcool / avec alcool / chaudes servent seulement à donner la couleur des boutons.</p>
+      <textarea id="adminProducts" rows="22"></textarea>
+      <div class="admin-actions">
+        <button value="cancel" class="secondary">Fermer</button>
+        <button id="btnReset" type="button" class="danger">Réinitialiser</button>
+        <button id="btnSaveAdmin" type="button" class="validate">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <section id="printArea" class="print-ticket"></section>
+
+  <script src="app.js"></script>
+</body>
+</html>
