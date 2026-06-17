@@ -17,7 +17,7 @@
       <small id="eventName">Manifestation</small>
     </div>
     <div class="top-actions">
-      <button id="btnAdmin" class="secondary">Paramètres</button>
+      <button id="btnSettings" class="secondary">Paramètres</button>
       <button id="btnExport" class="secondary">Export CSV</button>
     </div>
   </header>
@@ -52,18 +52,10 @@
       </div>
 
       <div class="keypad">
-        <button data-key="7">7</button>
-        <button data-key="8">8</button>
-        <button data-key="9">9</button>
-        <button data-key="4">4</button>
-        <button data-key="5">5</button>
-        <button data-key="6">6</button>
-        <button data-key="1">1</button>
-        <button data-key="2">2</button>
-        <button data-key="3">3</button>
-        <button data-key="clear" class="key-clear">C</button>
-        <button data-key="0">0</button>
-        <button data-key="back" class="key-back">←</button>
+        <button data-key="7">7</button><button data-key="8">8</button><button data-key="9">9</button>
+        <button data-key="4">4</button><button data-key="5">5</button><button data-key="6">6</button>
+        <button data-key="1">1</button><button data-key="2">2</button><button data-key="3">3</button>
+        <button data-key="clear" class="key-clear">C</button><button data-key="0">0</button><button data-key="back" class="key-back">←</button>
       </div>
 
       <label>À rendre</label>
@@ -73,29 +65,58 @@
         <button id="payCash" class="pay cash" data-method="Espèces">Espèces</button>
         <button id="payCard" class="pay card" data-method="CB">CB</button>
       </div>
-
       <p class="payment-hint">Clique sur Espèces ou CB pour valider et imprimer.</p>
     </section>
   </main>
 
-  <dialog id="adminDialog" class="no-print">
-    <form method="dialog" class="admin">
-      <h2>Paramètres</h2>
-      <label>Nom de la manifestation</label>
-      <input id="adminEventName" />
-      <label>Produits et prix</label>
-      <p class="hint">Une ligne = catégorie;nom;prix. Laisse le nom vide pour garder un bouton vierge. Les rubriques affichées sont Boissons, Restauration et Consignes. Les catégories boissons sans alcool / avec alcool / chaudes servent seulement à donner la couleur des boutons.</p>
-      <textarea id="adminProducts" rows="22"></textarea>
-      <div class="admin-actions">
-        <button value="cancel" class="secondary">Fermer</button>
-        <button id="btnReset" type="button" class="danger">Réinitialiser</button>
-        <button id="btnSaveAdmin" type="button" class="validate">Enregistrer</button>
+  <dialog id="settingsDialog" class="no-print">
+    <div class="settings">
+      <div class="settings-head">
+        <h2>Paramètres</h2>
+        <button id="btnCloseSettings" class="secondary">Fermer</button>
       </div>
-    </form>
+      <div class="settings-tabs">
+        <button class="tab active" data-tab="products">1. Produits</button>
+        <button class="tab" data-tab="foods">2. Aliments</button>
+        <button class="tab" data-tab="stocks">3. Stocks</button>
+        <button class="tab" data-tab="general">4. Général</button>
+      </div>
+
+      <section id="tab-products" class="tab-panel active">
+        <p class="hint">Produit simple = vendu tel quel. Produit composé = composé d'aliments de base. Menu = contient des produits simples et/ou composés. Les boutons vides restent affichés.</p>
+        <div id="productEditor" class="editor-list"></div>
+      </section>
+
+      <section id="tab-foods" class="tab-panel">
+        <p class="hint">Les aliments de base servent aux produits composés : par exemple saucisse, merguez, purée.</p>
+        <div id="foodEditor" class="editor-list"></div>
+        <button id="btnAddFood" class="secondary">Ajouter un aliment</button>
+      </section>
+
+      <section id="tab-stocks" class="tab-panel">
+        <p class="hint">Vide = pas de suivi. Nombre = suivi du stock. Les produits simples et les aliments de base apparaissent ici.</p>
+        <div id="stockEditor" class="editor-list"></div>
+      </section>
+
+      <section id="tab-general" class="tab-panel">
+        <label>Nom de la manifestation</label>
+        <input id="setEventName" />
+        <label>Préfixe iPad</label>
+        <select id="setPrefix"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        <label>Couleur du ticket</label>
+        <select id="setTicketColor"><option value="black">Noir</option><option value="blue">Bleu</option><option value="red">Rouge</option></select>
+        <h3>Couleur par catégorie</h3>
+        <div id="categoryColorEditor" class="editor-list"></div>
+      </section>
+
+      <div class="settings-actions">
+        <button id="btnReset" class="danger">Réinitialiser</button>
+        <button id="btnSaveSettings" class="validate">Enregistrer</button>
+      </div>
+    </div>
   </dialog>
 
   <section id="printArea" class="print-ticket"></section>
-
   <script src="app.js"></script>
 </body>
 </html>
