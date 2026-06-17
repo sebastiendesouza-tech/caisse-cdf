@@ -10,7 +10,9 @@ h3 { margin: 10px 0 6px; }
 .top-actions { display: flex; gap: 8px; }
 .app { display: grid; grid-template-columns: minmax(330px, 1.25fr) minmax(265px, .9fr) minmax(230px, .75fr); gap: 8px; padding: 8px; height: calc(100dvh - 62px); overflow: hidden; }
 .products-zone, .cart-zone, .payment-zone { background: white; border-radius: 14px; padding: 9px; box-shadow: 0 1px 8px #0001; overflow: auto; }
-.category { margin-bottom: 10px; border-left: 8px solid #d1d5db; padding-left: 7px; }
+.products-zone { padding-top: 6px; }
+.products-zone > h2, .category h3 { display: none; }
+.category { margin-bottom: 7px; border-left: 8px solid #d1d5db; padding-left: 7px; }
 .category h3 { margin: 0 0 6px; font-size: 17px; }
 .product-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 5px; }
 .product-btn { min-height: 46px; text-align: left; padding: 7px; border: 2px solid transparent; }
@@ -31,9 +33,9 @@ h3 { margin: 10px 0 6px; }
 .empty { color: #6b7280; padding: 20px 0; }
 .cart-summary { margin-top: 12px; padding: 12px; border-radius: 12px; background: #f3f4f6; font-size: 23px; font-weight: 900; text-align: right; }
 .cart-actions, .payment-buttons, .settings-actions { display: flex; gap: 8px; margin-top: 12px; }
-.payment-zone label, .settings label { display: block; margin: 9px 0 4px; color: #4b5563; font-weight: 700; }
+.payment-zone label, .settings label { display: block; margin: 7px 0 3px; color: #4b5563; font-weight: 700; }
 .money { font-size: 30px; font-weight: 800; }
-.paid-display { border: 2px solid #111827; border-radius: 12px; padding: 10px; font-size: 29px; font-weight: 800; text-align: right; background: #f9fafb; }
+.paid-display { border: 2px solid #111827; border-radius: 10px; padding: 6px 8px; font-size: 22px; font-weight: 800; text-align: right; background: #f9fafb; }
 .quick-cash { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; margin: 8px 0; }
 .quick-cash button { background: #dbeafe; color: #1e3a8a; padding: 9px 4px; }
 .quick-cash .exact { background: #bbf7d0; color: #14532d; }
@@ -184,4 +186,43 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
  @page{size:A6 portrait; margin:4mm;}
  body{margin:0}
  .ticket{margin:0;padding:2mm}
+}
+
+
+@media (orientation: landscape) and (max-height: 850px) {
+  .topbar { padding: 7px 10px; }
+  h1 { font-size: 19px; }
+  .app { height: calc(100dvh - 48px); grid-template-columns: minmax(390px, 1.35fr) minmax(285px, .9fr) minmax(220px, .7fr); gap: 7px; padding: 7px; }
+  .product-grid { gap: 4px; }
+  .product-btn { min-height: 42px; padding: 6px; }
+  .product-btn strong { font-size: 12.5px; }
+  .product-btn span { font-size: 11.5px; }
+  .paid-display { font-size: 20px; padding: 5px 7px; }
+  .quick-cash button { padding: 7px 3px; }
+  .keypad button { min-height: 40px; font-size: 20px; }
+  .pay { font-size: 16px; padding: 10px 8px; }
+}
+
+/* v18.5 - ergonomie iPad paysage */
+.products-zone { display: flex; flex-direction: column; overflow: hidden; }
+#categories { flex: 1; overflow-y: auto; min-height: 0; padding-right: 2px; }
+#meatStock { flex: 0 0 auto; }
+.product-btn { text-align: center !important; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; }
+.product-btn .btn-stock { display: block; font-style: normal; font-size: 11px; font-weight: 900; opacity: .95; }
+.product-btn.out-stock { opacity: .38; filter: grayscale(1); cursor: not-allowed; }
+.product-btn.out-stock .btn-stock { color: inherit; }
+.settings-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.caisse-action, .reprint-bottom { width: 100%; margin-top: 10px; }
+.reprint-bottom { margin-top: auto; }
+.payment-zone { display: flex; flex-direction: column; }
+.payment-zone .payment-hint { margin-bottom: 6px; }
+.meat-stock-box { margin-top: 8px; padding: 8px; }
+.meat-stock-box h3 { display: none; }
+.meat-stock-item { padding: 7px 8px; }
+.meat-stock-item strong { font-size: 20px; }
+@media (orientation: landscape) and (max-height: 850px) {
+  .settings-tabs { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .product-btn { min-height: 44px; }
+  .product-btn .btn-stock { font-size: 10.5px; }
+  .meat-stock-box { padding: 7px; }
 }

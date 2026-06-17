@@ -13,21 +13,17 @@
 <body>
   <header class="topbar no-print">
     <div>
-      <h1>Caisse by SDS <span class="version-badge">v18</span></h1>
+      <h1>Caisse by SDS <span class="version-badge">v18.5</span></h1>
     </div>
     <div class="top-actions">
       <button id="btnSettings" class="secondary">Paramètres</button>
-      <button id="btnOrders" class="secondary">Commandes</button>
-      <button id="btnReport" class="secondary">Bilan</button>
-      <button id="btnQuickRefund" class="secondary refund-shortcut">Remboursement</button>
-      <button id="btnExport" class="secondary">Export CSV</button>
     </div>
   </header>
 
   <main class="app no-print">
     <section class="products-zone">
-      <h2>Produits</h2>
       <div id="categories"></div>
+      <div id="meatStock"></div>
     </section>
 
     <section class="cart-zone">
@@ -77,7 +73,9 @@
         <button id="btnVolunteer" class="pay volunteer-pay" type="button">Bénévole</button>
       </div>
 
-      <p class="payment-hint">Clique sur Espèces ou CB pour valider et imprimer.</p><button id="btnReprintLast" class="secondary" style="margin-top:20px;width:100%">Réimprimer dernier ticket</button>
+      <p class="payment-hint">Clique sur Espèces ou CB pour valider et imprimer.</p>
+      <button id="btnQuickRefund" class="secondary refund-shortcut caisse-action">Remboursement</button>
+      <button id="btnReprintLast" class="secondary reprint-bottom">Réimprimer dernier ticket</button>
     </section>
   </main>
 
@@ -106,6 +104,9 @@
         <button class="tab" data-tab="stocks">Stocks</button>
         <button class="tab" data-tab="general">Général</button>
         <button class="tab" data-tab="volunteers">Bénévoles</button>
+        <button class="tab" data-tab="orders">Commandes</button>
+        <button class="tab" data-tab="report">Bilan</button>
+        <button class="tab" data-tab="export">Export CSV</button>
       </div>
       <section id="tab-products" class="tab-panel active">
         <p class="hint">Pour un produit composé ou un menu, choisis les viandes/accompagnements proposés, le nombre à choisir, et un supplément éventuel par aliment.</p>
@@ -132,6 +133,18 @@
       <section id="tab-volunteers" class="tab-panel">
         <button id="btnAddVolunteer" class="secondary">Ajouter un bénévole</button>
         <div id="volunteerEditor" class="editor-list"></div>
+      </section>
+      <section id="tab-orders" class="tab-panel">
+        <p class="hint">Accès rapide à l'historique des commandes.</p>
+        <button id="btnOrders" class="secondary">Afficher les commandes</button>
+      </section>
+      <section id="tab-report" class="tab-panel">
+        <p class="hint">Bilan des ventes, paiements et remboursements.</p>
+        <button id="btnReport" class="secondary">Afficher le bilan</button>
+      </section>
+      <section id="tab-export" class="tab-panel">
+        <p class="hint">Export des ventes et remboursements au format CSV.</p>
+        <button id="btnExport" class="secondary">Exporter CSV</button>
       </section>
       <div class="settings-actions">
         <button id="btnReset" class="danger">Réinitialiser</button>

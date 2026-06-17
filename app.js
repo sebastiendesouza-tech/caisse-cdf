@@ -12,7 +12,7 @@ const PALETTE = {
 };
 
 const DEFAULT_CONFIG = {
-  configVersion: 15,
+  configVersion: 18.5,
   eventName: 'Manifestation',
   orderPrefix: 'A',
   ticketColor: 'black',
@@ -70,10 +70,6 @@ const DEFAULT_CONFIG = {
     ] },
     { id: 'p-restau-libre-1', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-restau-libre-2', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-restau-libre-3', group: 'Restauration', category: 'Entrée', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-restau-libre-4', group: 'Restauration', category: 'Fromage', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-restau-libre-5', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-restau-libre-6', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
 
     { id: 'p-consigne', group: 'Consignes', category: 'Consigne', name: 'Consigne gobelet', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-retour-consigne', group: 'Consignes', category: 'Retour consigne', name: 'Retour gobelet', price: -1, type: 'simple', components: [], refundable: false, stock: '' }
@@ -114,6 +110,21 @@ function compactChoiceOptions(choice) {
 function compactAllChoices(c) {
   (c.products || []).forEach(p => {
     (p.choices || []).forEach(compactChoiceOptions);
+    (p.menuSections || []).forEach(section => (section.options || []).forEach(opt => {
+      if (opt.nestedChoices) opt.nestedChoices.forEach(compactChoiceOptions);
+    }));
+  });
+}
+
+function limitEmptyRestorationSlots(c) {
+  if (!Array.isArray(c.products)) return;
+  let emptyKept = 0;
+  c.products = c.products.filter(p => {
+    const isRest = (p.group || displayGroup(p.category)) === 'Restauration';
+    const isEmpty = isRest && !String(p.name || '').trim();
+    if (!isEmpty) return true;
+    emptyKept += 1;
+    return emptyKept <= 2;
   });
 }
 
@@ -123,7 +134,7 @@ function normalizeConfig(c) {
   if (Array.isArray(c.products) && c.products[0] && !c.products[0].id) {
     c.products = c.products.map((p, i) => ({ id: 'p' + (i + 1), group: displayGroup(p.category), category: p.category || 'Plat', name: p.name || '', price: Number(p.price || 0), type: 'simple', components: [], refundable: true, stock: '' }));
   }
-  c.configVersion = 15;
+  c.configVersion = 18.5;
   c.eventName ||= base.eventName;
   c.orderPrefix ||= 'A';
   c.ticketColor ||= 'black';
@@ -135,6 +146,7 @@ function normalizeConfig(c) {
   c.baseFoods.forEach(f => { f.id ||= uid('food'); f.category ||= 'Viande'; f.stock ??= ''; });
   c.volunteers.forEach(v => { v.id ||= uid('vol'); v.name ||= 'Bénévole'; v.active = v.active !== false; });
   compactAllChoices(c);
+  limitEmptyRestorationSlots(c);
   return c;
 }
 
@@ -168,15 +180,34 @@ function stockAvailable(product) {
   return true;
 }
 
+function ticketCategoryGroup(category) {
+  const c = String(category || '').toLowerCase();
+  if (c.includes('boisson')) return 'Boissons';
+  if (c.includes('entrée')) return 'Entrée';
+  if (c.includes('plat')) return 'Plat';
+  if (c.includes('fromage')) return 'Fromage';
+  if (c.includes('dessert')) return 'Dessert';
+  if (c.includes('consigne')) return 'Consigne';
+  return 'Plat';
+}
+const TICKET_SORT_ORDER = ['Boissons', 'Entrée', 'Plat', 'Fromage', 'Dessert', 'Consigne'];
+function ticketSortIndex(category) {
+  const group = ticketCategoryGroup(category);
+  const idx = TICKET_SORT_ORDER.indexOf(group);
+  return idx === -1 ? 99 : idx;
+}
+
 function renderProducts() {
   document.documentElement.style.setProperty('--ticket-color', config.ticketColor);
   const wrap = document.getElementById('categories');
+  const meat = document.getElementById('meatStock');
   const groups = {};
   config.products.forEach(p => (groups[p.group || displayGroup(p.category)] ||= []).push(p));
   wrap.innerHTML = GROUP_ORDER.map(group => {
     const products = groups[group] || [];
     return `<div class="category ${groupClass(group)}"><h3>${group}</h3><div class="product-grid">${products.map(productButtonHtml).join('')}</div></div>`;
-  }).join('') + renderMeatStockBox();
+  }).join('');
+  if (meat) meat.innerHTML = renderMeatStockBox();
   document.querySelectorAll('.product-btn:not(.empty-product):not(.out-stock)').forEach(btn => btn.addEventListener('click', () => addProduct(btn.dataset.id)));
 }
 function renderMeatStockBox() {
@@ -193,14 +224,16 @@ function productButtonHtml(p) {
   const style = `background:${col.bg};color:${col.fg}`;
   if (!p.name) return `<button class="product-btn empty-product" style="${style}" disabled><strong>Libre</strong><span>A paramétrer</span></button>`;
   const out = !stockAvailable(p);
-  return `<button class="product-btn ${out ? 'out-stock' : ''}" style="${style}" data-id="${p.id}" ${out ? 'disabled' : ''}><strong>${escapeHtml(p.name)}</strong><span>${fmt(p.price)}${out ? ' - rupture' : ''}</span></button>`;
+  const stockLabel = isTracked(p.stock) ? `<em class="btn-stock">Stock ${Number(p.stock)}</em>` : '';
+  const sub = `${fmt(p.price)}${out ? ' - rupture' : ''}`;
+  return `<button class="product-btn ${out ? 'out-stock' : ''}" style="${style}" data-id="${p.id}" ${out ? 'disabled' : ''}><strong>${escapeHtml(p.name)}</strong><span>${sub}</span>${stockLabel}</button>`;
 }
 function addProduct(id) {
   const p = config.products.find(x => x.id === id);
   if (!p || !p.name) return;
   if (p.type === 'compose' && (p.choices || []).length) return openChoiceDialog(p);
   if (p.type === 'menu' && (p.menuSections || []).length) return openMenuDialog(p);
-  addCartLine({ id: p.id, name: p.name, price: p.price, qty: 1, refundable: p.refundable, selectedFoods: [] });
+  addCartLine({ id: p.id, name: p.name, category: p.category, price: p.price, qty: 1, refundable: p.refundable, selectedFoods: [] });
 }
 function addCartLine(lineData) {
   const foodKey = (lineData.selectedFoods || []).map(x => `${x.foodId}:${x.qty || 1}`).sort().join(',');
@@ -263,19 +296,38 @@ function ticketLineHtml(name, qty, price, cls = '', withChecks = true) {
 }
 function buildTicket() {
   const number = `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`;
-  const lines = cart.map(item => {
-    const mainHasCheck = item.type !== 'menu';
-    let html = ticketLineHtml(item.name, item.qty, item.qty * item.price, 'ticket-main-line', mainHasCheck);
-    if (item.ticketChildren && item.ticketChildren.length) {
-      html += item.ticketChildren.map(child => {
-        const childQty = child.qty || item.qty || 1;
-        const comp = child.composition ? `<div class="ticket-composition">(${escapeHtml(child.composition)})</div>` : '';
-        const checks = child.withCheck === false ? '' : checkMarker(childQty);
-        return `<div class="ticket-subline ${child.withCheck === false ? 'no-check' : ''}"><div>${child.qtyLabel || ''}</div><div><div class="ticket-product">${escapeHtml(child.name)}</div>${comp}</div><div class="checks">${checks}</div><div></div></div>`;
-      }).join('');
-    } else if (item.detail) {
-      html += `<div class="ticket-subline no-check"><div></div><div class="ticket-composition">(${escapeHtml(item.detail)})</div><div></div><div></div></div>`;
+  const printable = [];
+  cart.forEach((item, cartIndex) => {
+    if (item.type === 'menu' && item.ticketChildren && item.ticketChildren.length) {
+      item.ticketChildren.forEach((child, childIndex) => {
+        printable.push({
+          order: cartIndex + childIndex / 100,
+          category: child.category || 'Plat',
+          name: child.name,
+          qty: child.qty || item.qty || 1,
+          price: null,
+          composition: child.composition || '',
+          withChecks: child.withCheck !== false,
+          cls: 'ticket-subline-as-main'
+        });
+      });
+      return;
     }
+    printable.push({
+      order: cartIndex,
+      category: item.category || 'Plat',
+      name: item.name,
+      qty: item.qty,
+      price: item.qty * item.price,
+      composition: item.detail || '',
+      withChecks: true,
+      cls: 'ticket-main-line'
+    });
+  });
+  printable.sort((a, b) => ticketSortIndex(a.category) - ticketSortIndex(b.category) || a.order - b.order);
+  const lines = printable.map(line => {
+    let html = ticketLineHtml(line.name, line.qty, line.price, line.cls || '', line.withChecks);
+    if (line.composition) html += `<div class="ticket-subline no-check"><div></div><div class="ticket-composition">(${escapeHtml(line.composition)})</div><div></div><div></div></div>`;
     return html;
   }).join('');
   document.getElementById('printArea').innerHTML = `<div class="ticket-title">Commande n° ${number}</div>${lines}<div class="ticket-bottom">Paiement : ${paymentMethod}</div><div class="ticket-bottom">Total : ${fmt(total())}</div>`;
@@ -290,6 +342,8 @@ function validateSale(extra = {}) {
   orderNumber += 1; saveOrderNumber(); cart = []; paidCents = 0; renderProducts(); renderCart();
 }
 function exportCsv() {
+  const settingsDialog = document.getElementById('settingsDialog');
+  if (settingsDialog && settingsDialog.open) settingsDialog.close();
   const rows = [['type','commande','date','paiement','benevole','regle','paye','rendu','produit','quantite','prix_unitaire','total_ligne','total_commande','motif']];
   sales.forEach(s => (s.items || []).forEach(i => rows.push([s.kind || 'sale', s.orderNumber, s.date, s.paymentMethod, s.volunteerName || '', s.settled === false ? 'non' : 'oui', s.paid || '', s.change || '', i.name, i.qty, i.price, i.qty * i.price, s.total, s.reason || ''])));
   const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');
@@ -308,7 +362,11 @@ function renderChoiceControls(choice, foods, mode, prefix) {
     const html = foods.map(({ opt, food }, idx) => `<label class="choice-option"><input type="radio" name="${mode}-${prefix}" data-${mode}-single="${prefix}" data-food-id="${food.id}" ${idx === 0 ? 'checked' : ''}> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('');
     return `<div class="choice-options-grid">${html}</div>`;
   }
-  return `<div class="counter-choice choice-options-grid" data-required="${required}" data-counter-group="${mode}-${prefix}">${foods.map(({ opt, food }) => `<div class="counter-row"><span>${escapeHtml(food.name)} ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</span><button type="button" data-count-delta="-1" data-target="${mode}-${prefix}-${food.id}">-</button><input readonly data-${mode}-count="${prefix}" data-food-id="${food.id}" id="${mode}-${prefix}-${food.id}" value="0"><button type="button" data-count-delta="1" data-target="${mode}-${prefix}-${food.id}">+</button></div>`).join('')}<div class="choice-total">Total : <span data-counter-total="${mode}-${prefix}">0</span> / ${required}</div></div>`;
+  const group = `${mode}-${prefix}`;
+  return `<div class="counter-choice choice-options-grid" data-required="${required}" data-counter-group="${group}">${foods.map(({ opt, food }) => {
+    const inputId = `${group}-${food.id}`;
+    return `<div class="counter-row"><span>${escapeHtml(food.name)} ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</span><button type="button" data-count-delta="-1" data-counter-target="${inputId}" data-counter-group-ref="${group}">-</button><input readonly data-${mode}-count="${prefix}" data-counter-member="${group}" data-food-id="${food.id}" id="${inputId}" value="0"><button type="button" data-count-delta="1" data-counter-target="${inputId}" data-counter-group-ref="${group}">+</button></div>`;
+  }).join('')}<div class="choice-total">Total : <span data-counter-total="${group}">0</span> / ${required}</div></div>`;
 }
 function readChoiceSelection(choice, foods, mode, prefix, productName) {
   const required = Number(choice.max || 0);
@@ -341,6 +399,7 @@ function openChoiceDialog(product) {
   pendingChoiceProduct = product;
   document.getElementById('choiceTitle').textContent = product.name;
   document.getElementById('choiceBody').innerHTML = (product.choices || []).map((choice, ci) => {
+    if (!choice.clientChoice) return ''; // choix imposé : pas d'affichage, mais conservé dans la composition
     const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
     const count = choice.max || 0;
     return `<div class="choice-block"><h3>${choice.category} ${choice.clientChoice ? `(choisir ${count})` : ''}</h3>${renderChoiceControls(choice, foods, 'choice', String(ci))}</div>`;
@@ -359,12 +418,13 @@ function addChoiceProduct() {
       selectedFoods.push(...result.selectedFoods); supplements += result.supplements; details.push(...result.details);
     }
   } catch (err) { return alert(err.message); }
-  addCartLine({ id: p.id, name: p.name, detail: summarizeNames(details), ticketChildren: [{ name: '', composition: summarizeNames(details), withCheck: false }], price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods });
+  addCartLine({ id: p.id, name: p.name, category: p.category, detail: summarizeNames(details), ticketChildren: [{ name: '', composition: summarizeNames(details), withCheck: false, category: p.category }], price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods });
   document.getElementById('choiceDialog').close();
   pendingChoiceProduct = null;
 }
 function renderComposeChoiceHtml(product, prefix) {
   return (product.choices || []).map((choice, ci) => {
+    if (!choice.clientChoice) return ''; // choix imposé : pas d'affichage dans le menu
     const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
     const count = choice.max || 0;
     const key = `${prefix}-${ci}`;
@@ -386,10 +446,17 @@ function openMenuDialog(product) {
   document.getElementById('choiceTitle').textContent = product.name;
   document.getElementById('choiceBody').innerHTML = (product.menuSections || []).map((section, si) => {
     const opts = (section.options || []).map(opt => ({ opt, product: config.products.find(p => p.id === opt.productId) })).filter(x => x.product);
-    const required = section.max || 1;
+    const required = Number(section.max || 1);
     const onlySimpleProducts = opts.every(({ product }) => product.type === 'simple');
     const optionsClass = onlySimpleProducts ? 'choice-options-grid menu-options-grid' : 'choice-options-list menu-options-list';
-    return `<div class="choice-block"><h3>${section.section} ${section.clientChoice ? `(choisir ${required})` : ''}</h3><div class="${optionsClass}">${opts.map(({ opt, product }, oi) => `<div class="menu-option-cell"><label class="choice-option"><input type="checkbox" data-menu-select="${si}" data-product-id="${product.id}" data-menu-opt="${si}-${oi}" ${!section.clientChoice ? 'checked disabled' : ''}> <span>${escapeHtml(product.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>${product.type === 'compose' ? renderComposeChoiceHtml(product, `menu-${si}-${oi}`) : ''}</div>`).join('')}</div></div>`;
+    return `<div class="choice-block"><h3>${section.section} ${section.clientChoice ? `(choisir ${required})` : ''}</h3><div class="${optionsClass}">${opts.map(({ opt, product }, oi) => {
+      const inputType = section.clientChoice && required <= 1 ? 'radio' : 'checkbox';
+      const inputName = inputType === 'radio' ? ` name="menu-section-${si}"` : '';
+      const checked = !section.clientChoice ? 'checked disabled' : '';
+      const defaultChecked = section.clientChoice && required <= 1 && oi === 0 ? 'checked' : '';
+      const nested = product.type === 'compose' ? renderComposeChoiceHtml(product, `menu-${si}-${oi}`) : '';
+      return `<div class="menu-option-cell"><label class="choice-option"><input type="${inputType}"${inputName} data-menu-select="${si}" data-product-id="${product.id}" data-menu-opt="${si}-${oi}" ${checked} ${defaultChecked}> <span>${escapeHtml(product.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>${nested}</div>`;
+    }).join('')}</div></div>`;
   }).join('');
   document.getElementById('choiceDialog').showModal();
 }
@@ -414,14 +481,14 @@ function addMenuProduct() {
           selectedFoods.push(...nested.selectedFoods);
           supplements += nested.supplements;
           if (nested.detail) detail += ` (${nested.detail})`;
-          ticketChildren.push({ qtyLabel: '1', name: `${product.name}`, composition: nested.detail });
+          ticketChildren.push({ qtyLabel: '1', name: `${product.name}`, composition: nested.detail, category: product.category });
         }
         details.push(detail);
-        if (product.type !== 'compose') ticketChildren.push({ qtyLabel: '1', name: `${product.name}` });
+        if (product.type !== 'compose') ticketChildren.push({ qtyLabel: '1', name: `${product.name}`, category: product.category });
       });
     }
   } catch (err) { return alert(err.message); }
-  addCartLine({ id: p.id, name: p.name, type: 'menu', detail: details.join(' / '), ticketChildren, price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods, selectedProducts });
+  addCartLine({ id: p.id, name: p.name, type: 'menu', category: p.category, detail: details.join(' / '), ticketChildren, price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods, selectedProducts });
   document.getElementById('choiceDialog').close();
   pendingChoiceProduct = null;
 }
@@ -638,6 +705,8 @@ function paymentTotals() {
   }, {});
 }
 function openReport() {
+  const settingsDialog = document.getElementById('settingsDialog');
+  if (settingsDialog && settingsDialog.open) settingsDialog.close();
   const totals = paymentTotals();
   const gross = sales.filter(s => (s.kind || 'sale') === 'sale').reduce((a,s)=>a+Number(s.total||0),0);
   const refunds = sales.filter(s => s.kind === 'refund').reduce((a,s)=>a+Math.abs(Number(s.total||0)),0);
@@ -657,6 +726,8 @@ function openReport() {
   document.getElementById('reportDialog').showModal();
 }
 function openOrders() {
+  const settingsDialog = document.getElementById('settingsDialog');
+  if (settingsDialog && settingsDialog.open) settingsDialog.close();
   const saleRows = sales.map((s, idx) => {
     const isRefund = s.kind === 'refund';
     const isVolunteer = s.kind === 'volunteer';
@@ -734,12 +805,12 @@ document.getElementById('btnSettings').addEventListener('click', openSettings);
 document.addEventListener('click', e => {
   const btn = e.target.closest('[data-count-delta]');
   if (!btn) return;
-  const input = document.getElementById(btn.dataset.target);
+  const input = document.getElementById(btn.dataset.counterTarget);
   if (!input) return;
-  const group = btn.dataset.target.split('-').slice(0, -1).join('-');
+  const group = btn.dataset.counterGroupRef;
   const wrapper = document.querySelector(`[data-counter-group="${group}"]`);
   const required = Number(wrapper?.dataset.required || 0);
-  const inputs = Array.from(document.querySelectorAll(`[id^="${group}-"]`));
+  const inputs = Array.from(document.querySelectorAll(`[data-counter-member="${group}"]`));
   const currentTotal = inputs.reduce((sum, x) => sum + Number(x.value || 0), 0);
   const delta = Number(btn.dataset.countDelta || 0);
   if (delta > 0 && currentTotal >= required) return;

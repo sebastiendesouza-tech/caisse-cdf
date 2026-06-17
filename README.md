@@ -42,3 +42,25 @@ Version simple HTML/CSS/JavaScript pour GitHub Pages et iPad.
 ## v17
 - Dans les menus, affichage en 2 colonnes uniquement quand la rubrique contient seulement des produits simples.
 - Les rubriques avec un plat composé comme l’assiette gourmande repassent en affichage une colonne pour éviter les bugs de saisie.
+
+
+## v18.5
+- Optimisation iPad 10 pouces paysage.
+- Suppression des mots Produits / Boissons / Restauration / Consignes dans la zone produits.
+- Restauration limitee a 8 boutons par defaut.
+- Somme payee plus compacte.
+
+
+## v18.5
+
+- Texte centré dans les boutons produits.
+- Stock affiché dans le bouton quand le suivi est actif.
+- Bouton bloqué/grisé si le stock suivi est à 0.
+- Bilan, commandes et export CSV déplacés dans Paramètres.
+- Bloc Merguez/Saucisses fixe en bas de la zone Produits.
+
+
+## v18.5
+- Masque les accompagnements imposés dans les écrans de choix.
+- Trie le ticket par boissons, entrées, plats, fromages, desserts puis consignes.
+- Les menus sont imprimés directement par éléments, sans ligne de menu inutile.
