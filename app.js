@@ -1392,34 +1392,44 @@ function buildStandalonePrintHtml(mode, contentHtml) {
     html, body {
       margin:0;
       padding:0;
+      width:105mm;
+      height:148mm;
+      min-width:105mm;
+      min-height:148mm;
       background:#fff;
       color:#000;
       -webkit-print-color-adjust: exact;
       print-color-adjust: exact;
       -webkit-text-size-adjust: 100%;
       text-size-adjust: 100%;
+      overflow:visible;
     }
     body {
       box-sizing:border-box;
       width:105mm;
       min-width:105mm;
       max-width:105mm;
+      height:148mm;
+      min-height:148mm;
       font-family: Arial, Helvetica, sans-serif;
       overflow:visible;
+      position:relative;
     }
     .ticket {
       box-sizing:border-box;
-      width:105mm;
-      min-width:105mm;
-      max-width:105mm;
-      padding:3mm 3mm 2mm 3mm;
+      width:88mm;
+      min-width:88mm;
+      max-width:88mm;
+      padding:2mm 1.5mm 1.5mm 1.5mm;
       color:#000;
       font-size:16pt;
       font-weight:900;
       line-height:1.08;
+      transform:scale(1.18);
+      transform-origin:top left;
     }
     .ticket h1 { text-align:center; font-size:15pt; margin:0 0 1mm; line-height:1; font-weight:900; }
-    /* v26.12 : AirPrint A6 pleine largeur, marges internes uniquement dans le ticket */
+    /* v26.13 : AirPrint A6 avec agrandissement global par transform, pour contourner les marges fixes Safari/Epson */
     .ticket-order {
       text-align:center;
       font-size:15pt;
@@ -1468,7 +1478,7 @@ function buildStandalonePrintHtml(mode, contentHtml) {
     html, body { margin:0; padding:0; background:#fff; color:#000; font-family: Arial, Helvetica, sans-serif; }
     body { font-size:11px; }
   `;
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Impression</title><style>${css}</style></head><body class="${mode}">${contentHtml}</body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=397, initial-scale=1, maximum-scale=1"><title>Impression</title><style>${css}</style></head><body class="${mode}">${contentHtml}</body></html>`;
 }
 
 function printCurrentContent(mode) {
