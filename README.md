@@ -23,12 +23,22 @@ Version simple HTML/CSS/JavaScript pour GitHub Pages et iPad.
 - Le menu est affiché de manière compacte : chaque élément avec sa case, composition en retrait.
 
 
-## v15
+## v17
 - Sélection du bénévole au moment de valider une commande bénévole.
 - Remboursement rapide par produit, sans chercher la commande d’origine.
 - Le remboursement rapide crée une écriture négative dans le bilan et le CSV.
 
 
-## v15
+## v17
 - Correction choix composés : une seule ligne par aliment, avec compteur quand le nombre à choisir est supérieur à 1.
 - Les quantités sont conservées pour la commande, le ticket et le suivi de stock.
+
+
+## v17
+- Choix des menus affichés en 2 colonnes par rubrique pour réduire l'ascenseur sur iPad.
+- Les compteurs de choix multiples restent sur une seule ligne par aliment.
+
+
+## v17
+- Dans les menus, affichage en 2 colonnes uniquement quand la rubrique contient seulement des produits simples.
+- Les rubriques avec un plat composé comme l’assiette gourmande repassent en affichage une colonne pour éviter les bugs de saisie.

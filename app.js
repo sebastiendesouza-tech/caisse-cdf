@@ -301,12 +301,14 @@ function exportCsv() {
 function renderChoiceControls(choice, foods, mode, prefix) {
   const required = Number(choice.max || 0);
   if (!choice.clientChoice) {
-    return foods.map(({ opt, food }) => `<label class="choice-option"><input type="checkbox" data-${mode}-fixed="${prefix}" data-food-id="${food.id}" checked disabled> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('');
+    const html = foods.map(({ opt, food }) => `<label class="choice-option"><input type="checkbox" data-${mode}-fixed="${prefix}" data-food-id="${food.id}" checked disabled> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('');
+    return `<div class="choice-options-grid">${html}</div>`;
   }
   if (required <= 1) {
-    return foods.map(({ opt, food }, idx) => `<label class="choice-option"><input type="radio" name="${mode}-${prefix}" data-${mode}-single="${prefix}" data-food-id="${food.id}" ${idx === 0 ? 'checked' : ''}> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('');
+    const html = foods.map(({ opt, food }, idx) => `<label class="choice-option"><input type="radio" name="${mode}-${prefix}" data-${mode}-single="${prefix}" data-food-id="${food.id}" ${idx === 0 ? 'checked' : ''}> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('');
+    return `<div class="choice-options-grid">${html}</div>`;
   }
-  return `<div class="counter-choice" data-required="${required}" data-counter-group="${mode}-${prefix}">${foods.map(({ opt, food }) => `<div class="counter-row"><span>${escapeHtml(food.name)} ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</span><button type="button" data-count-delta="-1" data-target="${mode}-${prefix}-${food.id}">-</button><input readonly data-${mode}-count="${prefix}" data-food-id="${food.id}" id="${mode}-${prefix}-${food.id}" value="0"><button type="button" data-count-delta="1" data-target="${mode}-${prefix}-${food.id}">+</button></div>`).join('')}<div class="choice-total">Total : <span data-counter-total="${mode}-${prefix}">0</span> / ${required}</div></div>`;
+  return `<div class="counter-choice choice-options-grid" data-required="${required}" data-counter-group="${mode}-${prefix}">${foods.map(({ opt, food }) => `<div class="counter-row"><span>${escapeHtml(food.name)} ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</span><button type="button" data-count-delta="-1" data-target="${mode}-${prefix}-${food.id}">-</button><input readonly data-${mode}-count="${prefix}" data-food-id="${food.id}" id="${mode}-${prefix}-${food.id}" value="0"><button type="button" data-count-delta="1" data-target="${mode}-${prefix}-${food.id}">+</button></div>`).join('')}<div class="choice-total">Total : <span data-counter-total="${mode}-${prefix}">0</span> / ${required}</div></div>`;
 }
 function readChoiceSelection(choice, foods, mode, prefix, productName) {
   const required = Number(choice.max || 0);
@@ -385,7 +387,9 @@ function openMenuDialog(product) {
   document.getElementById('choiceBody').innerHTML = (product.menuSections || []).map((section, si) => {
     const opts = (section.options || []).map(opt => ({ opt, product: config.products.find(p => p.id === opt.productId) })).filter(x => x.product);
     const required = section.max || 1;
-    return `<div class="choice-block"><h3>${section.section} ${section.clientChoice ? `(choisir ${required})` : ''}</h3>${opts.map(({ opt, product }, oi) => `<label class="choice-option"><input type="checkbox" data-menu-select="${si}" data-product-id="${product.id}" data-menu-opt="${si}-${oi}" ${!section.clientChoice ? 'checked disabled' : ''}> <span>${escapeHtml(product.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>${product.type === 'compose' ? renderComposeChoiceHtml(product, `menu-${si}-${oi}`) : ''}`).join('')}</div>`;
+    const onlySimpleProducts = opts.every(({ product }) => product.type === 'simple');
+    const optionsClass = onlySimpleProducts ? 'choice-options-grid menu-options-grid' : 'choice-options-list menu-options-list';
+    return `<div class="choice-block"><h3>${section.section} ${section.clientChoice ? `(choisir ${required})` : ''}</h3><div class="${optionsClass}">${opts.map(({ opt, product }, oi) => `<div class="menu-option-cell"><label class="choice-option"><input type="checkbox" data-menu-select="${si}" data-product-id="${product.id}" data-menu-opt="${si}-${oi}" ${!section.clientChoice ? 'checked disabled' : ''}> <span>${escapeHtml(product.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>${product.type === 'compose' ? renderComposeChoiceHtml(product, `menu-${si}-${oi}`) : ''}</div>`).join('')}</div></div>`;
   }).join('');
   document.getElementById('choiceDialog').showModal();
 }

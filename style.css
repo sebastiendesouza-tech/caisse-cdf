@@ -8,7 +8,7 @@ h1 { margin: 0; font-size: 21px; }
 h2 { margin: 0 0 8px; font-size: 19px; }
 h3 { margin: 10px 0 6px; }
 .top-actions { display: flex; gap: 8px; }
-.app { display: grid; grid-template-columns: minmax(330px, 1.25fr) minmax(265px, .9fr) minmax(230px, .75fr); gap: 8px; padding: 8px; height: calc(100vh - 62px); overflow: hidden; }
+.app { display: grid; grid-template-columns: minmax(330px, 1.25fr) minmax(265px, .9fr) minmax(230px, .75fr); gap: 8px; padding: 8px; height: calc(100dvh - 62px); overflow: hidden; }
 .products-zone, .cart-zone, .payment-zone { background: white; border-radius: 14px; padding: 9px; box-shadow: 0 1px 8px #0001; overflow: auto; }
 .category { margin-bottom: 10px; border-left: 8px solid #d1d5db; padding-left: 7px; }
 .category h3 { margin: 0 0 6px; font-size: 17px; }
@@ -162,3 +162,26 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
 .counter-row button { min-height: 38px; border: 0; border-radius: 10px; background: #111827; color: #fff; font-size: 20px; font-weight: 900; }
 .counter-row input { text-align: center; font-size: 18px; font-weight: 900; padding: 6px; }
 .choice-total { text-align: right; font-weight: 900; }
+
+/* v16 - choix de menu en 2 colonnes pour limiter l'ascenseur sur iPad */
+.choice-options-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; align-items: stretch; }
+.choice-options-grid .choice-option { margin: 0; height: 100%; box-sizing: border-box; }
+
+.choice-options-list { display: grid; grid-template-columns: 1fr; gap: 6px; align-items: stretch; }
+.choice-options-list .choice-option { margin: 0; box-sizing: border-box; }
+.menu-options-list .menu-option-cell { width: 100%; }
+
+.menu-option-cell { min-width: 0; }
+.menu-option-cell .nested-choice { margin: 6px 0 0 0; padding: 6px; }
+.choice-options-grid .choice-total { grid-column: 1 / -1; }
+.counter-choice.choice-options-grid { align-items: start; }
+@media (max-width: 520px) { .choice-options-grid { grid-template-columns: 1fr; } }
+
+.cart-zone{display:flex;flex-direction:column;overflow:hidden}
+#cartLines{flex:1;overflow:auto}
+.cart-summary{position:sticky;bottom:0}
+@media print{
+ @page{size:A6 portrait; margin:4mm;}
+ body{margin:0}
+ .ticket{margin:0;padding:2mm}
+}
