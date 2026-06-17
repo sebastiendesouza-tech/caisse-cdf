@@ -1,51 +1,21 @@
-# Caisse manifestation simple
+# Caisse manifestation - version simple GitHub Pages v7
 
-Application de caisse simple pour iPad, en HTML/CSS/JavaScript.
+Application HTML/CSS/JavaScript, sans installation serveur.
 
-## Installation avec GitHub Pages
+## Nouveautés v7
 
-1. Créer un dépôt GitHub nommé `caisse-manifestation`.
-2. Envoyer tous les fichiers de ce dossier dans le dépôt.
-3. Aller dans `Settings` > `Pages`.
-4. Dans `Build and deployment`, choisir :
-   - Source : `Deploy from a branch`
-   - Branch : `main`
-   - Folder : `/root`
-5. Cliquer sur `Save`.
-6. Ouvrir l'adresse GitHub Pages générée.
+- numéro de version visible dans l'en-tête ;
+- sous-menu "produit composé" affiché dès que le type composé est choisi ;
+- réglage des menus avec 4 rubriques : Entrée, Plat, Fromage, Dessert ;
+- pour chaque rubrique du menu : choix client activable, nombre à choisir et supplément possible ;
+- le plat d'un menu peut être un produit simple ou un produit composé ;
+- interface iPad conservée en colonnes côte à côte.
 
-## Sur iPad
+## Installation GitHub Pages
 
-1. Ouvrir l'adresse dans Safari.
-2. Appuyer sur Partager.
-3. Choisir `Ajouter à l'écran d'accueil`.
-
-## Modifier les produits
-
-Dans l'application, cliquer sur `Paramètres`.
-Format d'une ligne :
-
-```text
-Catégorie;Nom du produit;Prix
-```
-
-Exemple :
-
-```text
-Boissons avec alcool;Bière;3
-Restauration;Plat;10
-Gobelets;Consigne gobelet;1
-```
-
-## Ticket A6
-
-Le ticket contient :
-
-```text
-Commande n° 0001
-quantité - nom - cases à cocher - prix
-Paiement
-Total
-```
-
-L'impression A6 est gérée par le CSS dans `style.css`.
+1. Déposer tous les fichiers dans un dépôt GitHub.
+2. Aller dans Settings > Pages.
+3. Source : Deploy from branch.
+4. Branch : main, dossier /root.
+5. Ouvrir l'URL fournie par GitHub Pages sur l'iPad.
+6. Safari > Partager > Ajouter à l'écran d'accueil.

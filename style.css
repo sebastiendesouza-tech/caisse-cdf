@@ -86,3 +86,29 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
   .ticket-price { font-size: 12px; }
   .ticket-bottom { margin-top: 10px; font-size: 14px; font-weight: 800; }
 }
+.product-edit-card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 8px; background: #fff; }
+.product-main { grid-template-columns: 1.4fr .7fr .8fr 1fr .8fr; }
+.choice-edit { margin: 8px 0 0; padding: 8px; border-radius: 12px; background: #f3f4f6; }
+.choice-edit h4 { margin: 0 0 6px; }
+.choice-rules { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: center; margin-bottom: 6px; }
+.choice-rules input[type="checkbox"], .option-line input[type="checkbox"], .choice-option input[type="checkbox"] { width: auto; transform: scale(1.2); }
+.option-line { display: grid; grid-template-columns: 1fr 160px; gap: 8px; align-items: center; margin: 5px 0; }
+.choice-block { border: 1px solid #e5e7eb; border-radius: 12px; padding: 10px; margin: 8px 0; }
+.choice-option { display: flex; gap: 10px; align-items: center; padding: 10px; margin: 6px 0; border-radius: 10px; background: #f3f4f6; font-weight: 800; }
+.choice-option span { flex: 1; }
+.cart-detail { color: #374151; font-size: 13px; margin-top: 2px; font-style: italic; }
+@media (max-width: 850px) {
+  .product-main, .choice-rules, .option-line { grid-template-columns: 1fr 1fr; }
+}
+
+.version-badge { display: inline-block; margin-left: 8px; padding: 2px 7px; border-radius: 999px; background: #e5e7eb; color: #111827; font-size: 13px; vertical-align: middle; }
+.product-edit-card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 8px; background: #fff; }
+.product-main { grid-template-columns: 1.4fr .7fr .9fr 1fr .8fr; }
+.choice-edit, .menu-edit { margin-top: 8px; padding: 8px; border-radius: 12px; background: #f3f4f6; }
+.choice-rules, .menu-rules { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-bottom: 6px; }
+.option-line { display: grid; grid-template-columns: 1.4fr .7fr; gap: 6px; align-items: center; padding: 4px 0; border-top: 1px solid #e5e7eb; }
+.choice-block { margin: 8px 0; padding: 8px; border-radius: 12px; background: #f9fafb; }
+.choice-option { display: block; padding: 8px; border-bottom: 1px solid #e5e7eb; }
+.choice-option input { width: auto; transform: scale(1.25); margin-right: 8px; }
+.nested-choice { margin: 4px 0 8px 24px; padding: 8px; border-left: 4px solid #d1d5db; background: #fff; }
+@media (max-width: 850px) { .product-main, .choice-rules, .menu-rules, .option-line { grid-template-columns: 1fr 1fr; } }

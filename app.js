@@ -49,8 +49,8 @@ const DEFAULT_CONFIG = {
     { id: 'p15', group: 'Boissons', category: 'Boissons chaudes', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p16', group: 'Boissons', category: 'Boissons chaudes', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p17', group: 'Restauration', category: 'Entrée', name: 'Entrée', price: 5, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p18', group: 'Restauration', category: 'Plat', name: 'Saucisse purée', price: 8, type: 'compose', components: ['food-saucisse', 'food-puree'], refundable: true, stock: '' },
-    { id: 'p19', group: 'Restauration', category: 'Plat', name: 'Merguez purée', price: 8, type: 'compose', components: ['food-merguez', 'food-puree'], refundable: true, stock: '' },
+    { id: 'p18', group: 'Restauration', category: 'Plat', name: 'Assiette 2 viandes frites', price: 8, type: 'compose', components: [], choices: [{ category: 'Viande', min: 2, max: 2, clientChoice: true, options: [{ foodId: 'food-saucisse', supplement: 0 }, { foodId: 'food-merguez', supplement: 0 }] }, { category: 'Accompagnement', min: 1, max: 1, clientChoice: false, options: [{ foodId: 'food-puree', supplement: 0 }] }], refundable: true, stock: '' },
+    { id: 'p19', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'compose', components: [], choices: [], refundable: true, stock: '' },
     { id: 'p20', group: 'Restauration', category: 'Fromage', name: 'Fromage', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p21', group: 'Restauration', category: 'Dessert', name: 'Dessert', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p22', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
@@ -74,6 +74,7 @@ let paymentMethod = 'Espèces';
 let paidCents = 0;
 let orderNumber = Number(localStorage.getItem('caisse_order_number') || '1');
 let sales = JSON.parse(localStorage.getItem('caisse_sales') || '[]');
+let pendingChoiceProduct = null;
 
 const fmt = n => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(n || 0);
 const total = () => cart.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -96,7 +97,7 @@ function normalizeConfig(c) {
   c.baseFoods ||= base.baseFoods;
   c.categoryColors ||= base.categoryColors;
   c.products ||= base.products;
-  c.products.forEach((p, i) => { p.id ||= 'p' + (i + 1); p.group ||= displayGroup(p.category); p.type ||= 'simple'; p.components ||= []; p.refundable = p.refundable !== false; p.stock ??= ''; });
+  c.products.forEach((p, i) => { p.id ||= 'p' + (i + 1); p.group ||= displayGroup(p.category); p.type ||= 'simple'; p.components ||= []; p.choices ||= []; p.menuSections ||= []; p.refundable = p.refundable !== false; p.stock ??= ''; });
   c.baseFoods.forEach(f => { f.id ||= uid('food'); f.category ||= 'Viande'; f.stock ??= ''; });
   return c;
 }
@@ -148,9 +149,15 @@ function productButtonHtml(p) {
 function addProduct(id) {
   const p = config.products.find(x => x.id === id);
   if (!p || !p.name) return;
-  const line = cart.find(i => i.id === id);
+  if (p.type === 'compose' && (p.choices || []).length) return openChoiceDialog(p);
+  if (p.type === 'menu' && (p.menuSections || []).length) return openMenuDialog(p);
+  addCartLine({ id: p.id, name: p.name, price: p.price, qty: 1, refundable: p.refundable, selectedFoods: [] });
+}
+function addCartLine(lineData) {
+  const key = lineData.id + '|' + (lineData.selectedFoods || []).map(x => x.foodId).sort().join(',') + '|' + lineData.price;
+  const line = cart.find(i => i.key === key);
   if (line) line.qty += 1;
-  else cart.push({ id: p.id, name: p.name, price: p.price, qty: 1, refundable: p.refundable });
+  else cart.push({ key, ...lineData });
   if (paymentMethod === 'CB') paidCents = Math.round(total() * 100);
   renderCart();
 }
@@ -160,7 +167,7 @@ function renderCart() {
   if (!cart.length) { list.className = 'cart-lines empty'; list.textContent = 'Aucun produit'; }
   else {
     list.className = 'cart-lines';
-    list.innerHTML = cart.map((item, index) => `<div class="cart-line"><div><div class="cart-name">${escapeHtml(item.name)}</div><div class="cart-unit">${fmt(item.price)} / unité</div></div><div class="qty-actions"><button data-action="minus" data-index="${index}">-</button><span class="qty-value">${item.qty}</span><button data-action="plus" data-index="${index}">+</button><button data-action="delete" data-index="${index}">x</button></div><div class="cart-total">${fmt(item.qty * item.price)}</div></div>`).join('');
+    list.innerHTML = cart.map((item, index) => `<div class="cart-line"><div><div class="cart-name">${escapeHtml(item.name)}</div>${item.detail ? `<div class="cart-detail">${escapeHtml(item.detail)}</div>` : ''}<div class="cart-unit">${fmt(item.price)} / unité</div></div><div class="qty-actions"><button data-action="minus" data-index="${index}">-</button><span class="qty-value">${item.qty}</span><button data-action="plus" data-index="${index}">+</button><button data-action="delete" data-index="${index}">x</button></div><div class="cart-total">${fmt(item.qty * item.price)}</div></div>`).join('');
   }
   document.querySelectorAll('[data-action]').forEach(btn => btn.addEventListener('click', updateLine));
   updatePayment();
@@ -195,7 +202,7 @@ function consumeStock() {
       if (food && isTracked(food.stock)) food.stock = Math.max(0, Number(food.stock) - qty);
     });
   };
-  cart.forEach(i => { if (i.price >= 0) consumeProduct(i.id, i.qty); });
+  cart.forEach(i => { if (i.price >= 0) { consumeProduct(i.id, i.qty); (i.selectedProducts || []).forEach(pid => consumeProduct(pid, i.qty)); (i.selectedFoods || []).forEach(sel => { const food = config.baseFoods.find(f => f.id === sel.foodId); if (food && isTracked(food.stock)) food.stock = Math.max(0, Number(food.stock) - i.qty); }); } });
   saveConfig();
 }
 function buildTicket() {
@@ -222,23 +229,169 @@ function exportCsv() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ventes-caisse.csv'; a.click();
 }
 
+
+function openChoiceDialog(product) {
+  pendingChoiceProduct = product;
+  document.getElementById('choiceTitle').textContent = product.name;
+  document.getElementById('choiceBody').innerHTML = (product.choices || []).map((choice, ci) => {
+    const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
+    const count = choice.max || 0;
+    return `<div class="choice-block"><h3>${choice.category} ${choice.clientChoice ? `(choisir ${count})` : ''}</h3>${foods.map(({ opt, food }) => `<label class="choice-option"><input type="checkbox" data-choice-select="${ci}" data-food-id="${food.id}" ${!choice.clientChoice ? 'checked disabled' : ''}> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('')}</div>`;
+  }).join('');
+  document.getElementById('choiceDialog').showModal();
+}
+function addChoiceProduct() {
+  const p = pendingChoiceProduct; if (!p) return;
+  if (p.type === 'menu') return addMenuProduct();
+  let selectedFoods = [], supplements = 0, details = [];
+  for (let ci = 0; ci < (p.choices || []).length; ci++) {
+    const choice = p.choices[ci], required = choice.max || 0;
+    const checked = Array.from(document.querySelectorAll(`[data-choice-select="${ci}"]:checked`)).map(x => x.dataset.foodId);
+    if (choice.clientChoice && checked.length !== required) return alert(`Il faut choisir ${required} ${choice.category.toLowerCase()}.`);
+    checked.forEach(foodId => { const opt = (choice.options || []).find(o => o.foodId === foodId); const food = config.baseFoods.find(f => f.id === foodId); if (food) { selectedFoods.push({ foodId, name: food.name }); details.push(food.name); supplements += Number(opt?.supplement || 0); } });
+  }
+  addCartLine({ id: p.id, name: p.name, detail: details.join(' + '), price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods });
+  document.getElementById('choiceDialog').close();
+  pendingChoiceProduct = null;
+}
+function renderComposeChoiceHtml(product, prefix) {
+  return (product.choices || []).map((choice, ci) => {
+    const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
+    const count = choice.max || 0;
+    return `<div class="nested-choice"><strong>${choice.category} ${choice.clientChoice ? `(choisir ${count})` : ''}</strong>${foods.map(({ opt, food }) => `<label class="choice-option"><input type="checkbox" data-compose-choice="${prefix}-${ci}" data-food-id="${food.id}" ${!choice.clientChoice ? 'checked disabled' : ''}> ${escapeHtml(food.name)} ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('')}</div>`;
+  }).join('');
+}
+function collectComposeChoices(product, prefix) {
+  let selectedFoods = [], supplements = 0, detailParts = [];
+  for (let ci = 0; ci < (product.choices || []).length; ci++) {
+    const choice = product.choices[ci], required = choice.max || 0;
+    const checked = Array.from(document.querySelectorAll(`[data-compose-choice="${prefix}-${ci}"]:checked`)).map(x => x.dataset.foodId);
+    if (choice.clientChoice && checked.length !== required) throw new Error(`Il faut choisir ${required} ${choice.category.toLowerCase()} pour ${product.name}.`);
+    checked.forEach(foodId => {
+      const opt = (choice.options || []).find(o => o.foodId === foodId);
+      const food = config.baseFoods.find(f => f.id === foodId);
+      if (food) { selectedFoods.push({ foodId, name: food.name }); detailParts.push(food.name); supplements += Number(opt?.supplement || 0); }
+    });
+  }
+  return { selectedFoods, supplements, detail: detailParts.join(' + ') };
+}
+function openMenuDialog(product) {
+  pendingChoiceProduct = product;
+  document.getElementById('choiceTitle').textContent = product.name;
+  document.getElementById('choiceBody').innerHTML = (product.menuSections || []).map((section, si) => {
+    const opts = (section.options || []).map(opt => ({ opt, product: config.products.find(p => p.id === opt.productId) })).filter(x => x.product);
+    const required = section.max || 1;
+    return `<div class="choice-block"><h3>${section.section} ${section.clientChoice ? `(choisir ${required})` : ''}</h3>${opts.map(({ opt, product }, oi) => `<label class="choice-option"><input type="checkbox" data-menu-select="${si}" data-product-id="${product.id}" data-menu-opt="${si}-${oi}" ${!section.clientChoice ? 'checked disabled' : ''}> <span>${escapeHtml(product.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>${product.type === 'compose' ? renderComposeChoiceHtml(product, `menu-${si}-${oi}`) : ''}`).join('')}</div>`;
+  }).join('');
+  document.getElementById('choiceDialog').showModal();
+}
+function addMenuProduct() {
+  const p = pendingChoiceProduct; if (!p) return;
+  let selectedFoods = [], selectedProducts = [], supplements = 0, details = [];
+  try {
+    for (let si = 0; si < (p.menuSections || []).length; si++) {
+      const section = p.menuSections[si], required = section.max || 1;
+      const checkedInputs = Array.from(document.querySelectorAll(`[data-menu-select="${si}"]:checked`));
+      if (section.clientChoice && checkedInputs.length !== required) return alert(`Il faut choisir ${required} produit(s) pour ${section.section}.`);
+      checkedInputs.forEach(input => {
+        const product = config.products.find(prod => prod.id === input.dataset.productId);
+        const opt = (section.options || []).find(o => o.productId === input.dataset.productId);
+        if (!product) return;
+        selectedProducts.push(product.id);
+        let detail = `${section.section}: ${product.name}`;
+        supplements += Number(opt?.supplement || 0);
+        if (product.type === 'compose') {
+          const oi = (section.options || []).findIndex(o => o.productId === input.dataset.productId);
+          const nested = collectComposeChoices(product, `menu-${si}-${oi}`);
+          selectedFoods.push(...nested.selectedFoods);
+          supplements += nested.supplements;
+          if (nested.detail) detail += ` (${nested.detail})`;
+        }
+        details.push(detail);
+      });
+    }
+  } catch (err) { return alert(err.message); }
+  addCartLine({ id: p.id, name: p.name, detail: details.join(' / '), price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods, selectedProducts });
+  document.getElementById('choiceDialog').close();
+  pendingChoiceProduct = null;
+}
+
 function openSettings() { draftConfig = clone(config); renderSettings(); document.getElementById('settingsDialog').showModal(); }
 function renderSettings() { renderProductEditor(); renderFoodEditor(); renderStockEditor(); renderGeneralEditor(); }
 function renderProductEditor() {
   const el = document.getElementById('productEditor');
-  const componentOptions = [...draftConfig.baseFoods.map(f => [f.id, 'Aliment - ' + f.name]), ...draftConfig.products.filter(p => p.name).map(p => [p.id, 'Produit - ' + p.name])];
-  el.innerHTML = draftConfig.products.map((p, i) => `<div class="editor-row"><div><small>Nom</small><input data-product="name" data-i="${i}" value="${escapeHtml(p.name)}"></div><div><small>Prix</small><input type="number" step="0.01" data-product="price" data-i="${i}" value="${p.price}"></div><div><small>Type</small><select data-product="type" data-i="${i}">${['simple','compose','menu'].map(t => `<option value="${t}" ${p.type === t ? 'selected' : ''}>${t}</option>`).join('')}</select></div><div><small>Catégorie</small><select data-product="category" data-i="${i}">${options(CATEGORIES, p.category)}</select></div><div><small>Composition</small><select multiple size="3" data-product="components" data-i="${i}">${componentOptions.filter(([id]) => id !== p.id).map(([id, label]) => `<option value="${id}" ${(p.components || []).includes(id) ? 'selected' : ''}>${escapeHtml(label)}</option>`).join('')}</select></div><div class="checkline"><input type="checkbox" data-product="refundable" data-i="${i}" ${p.refundable ? 'checked' : ''}> Remboursable</div></div>`).join('');
+  el.innerHTML = draftConfig.products.map((p, i) => {
+    const detail = p.type === 'compose' ? renderChoiceEditor(p, i) : (p.type === 'menu' ? renderMenuEditor(p, i) : '');
+    return `<div class="product-edit-card"><div class="editor-row product-main"><div><small>Nom</small><input data-product="name" data-i="${i}" value="${escapeHtml(p.name)}"></div><div><small>Prix de base</small><input type="number" step="0.01" data-product="price" data-i="${i}" value="${p.price}"></div><div><small>Type</small><select data-product="type" data-i="${i}"><option value="simple" ${p.type === 'simple' ? 'selected' : ''}>produit simple</option><option value="compose" ${p.type === 'compose' ? 'selected' : ''}>produit composé</option><option value="menu" ${p.type === 'menu' ? 'selected' : ''}>menu</option></select></div><div><small>Catégorie</small><select data-product="category" data-i="${i}">${options(CATEGORIES, p.category)}</select></div><div class="checkline"><input type="checkbox" data-product="refundable" data-i="${i}" ${p.refundable ? 'checked' : ''}> Remboursable</div></div>${detail}</div>`;
+  }).join('');
   el.querySelectorAll('[data-product]').forEach(x => x.addEventListener('change', updateProductDraft));
+  el.querySelectorAll('[data-choice-field]').forEach(x => x.addEventListener('change', updateChoiceDraft));
+  el.querySelectorAll('[data-menu-field]').forEach(x => x.addEventListener('change', updateMenuDraft));
 }
+function renderChoiceEditor(p, i) {
+  const groups = ['Viande', 'Accompagnement'];
+  return `<div class="choice-edit"><h4>Réglage produit composé</h4>${groups.map(cat => {
+    let choice = (p.choices || []).find(c => c.category === cat) || { category: cat, min: 0, max: 0, clientChoice: false, options: [] };
+    const foods = draftConfig.baseFoods.filter(f => f.category === cat);
+    return `<div><h4>${cat}</h4><div class="choice-rules"><label><input type="checkbox" data-choice-field="clientChoice" data-i="${i}" data-cat="${cat}" ${choice.clientChoice ? 'checked' : ''}> Choix laissé au client</label><label>Nombre à choisir <input type="number" min="0" data-choice-field="max" data-i="${i}" data-cat="${cat}" value="${choice.max || 0}"></label></div>${foods.map(f => { const opt = (choice.options || []).find(o => o.foodId === f.id); return `<div class="option-line"><label><input type="checkbox" data-choice-field="option" data-i="${i}" data-cat="${cat}" data-food-id="${f.id}" ${opt ? 'checked' : ''}> ${escapeHtml(f.name)}</label><label>Supplément <input type="number" step="0.01" data-choice-field="supplement" data-i="${i}" data-cat="${cat}" data-food-id="${f.id}" value="${opt?.supplement || 0}"></label></div>`; }).join('')}</div>`;
+  }).join('')}</div>`;
+}
+function renderMenuEditor(p, i) {
+  const sections = ['Entrée', 'Plat', 'Fromage', 'Dessert'];
+  return `<div class="menu-edit"><h4>Réglage menu</h4><p class="hint">Chaque rubrique peut être fixe ou laissée au choix du client. Le plat peut être un produit simple ou un produit composé déjà paramétré.</p>${sections.map(section => {
+    let cfg = (p.menuSections || []).find(c => c.section === section) || { section, clientChoice: false, max: 1, options: [] };
+    const candidates = draftConfig.products.filter(prod => prod.id !== p.id && prod.name && prod.category === section);
+    return `<div class="menu-section"><h4>${section}</h4><div class="menu-rules"><label><input type="checkbox" data-menu-field="clientChoice" data-i="${i}" data-section="${section}" ${cfg.clientChoice ? 'checked' : ''}> Choix laissé au client</label><label>Nombre à choisir <input type="number" min="0" data-menu-field="max" data-i="${i}" data-section="${section}" value="${cfg.max || 1}"></label></div>${candidates.length ? candidates.map(prod => { const opt = (cfg.options || []).find(o => o.productId === prod.id); return `<div class="option-line"><label><input type="checkbox" data-menu-field="option" data-i="${i}" data-section="${section}" data-product-id="${prod.id}" ${opt ? 'checked' : ''}> ${escapeHtml(prod.name)} <small>(${prod.type === 'compose' ? 'composé' : 'simple'})</small></label><label>Supplément <input type="number" step="0.01" data-menu-field="supplement" data-i="${i}" data-section="${section}" data-product-id="${prod.id}" value="${opt?.supplement || 0}"></label></div>`; }).join('') : '<p class="hint">Aucun produit dans cette catégorie.</p>'}</div>`;
+  }).join('')}</div>`;
+}
+function ensureChoice(p, cat) {
+  p.choices ||= [];
+  let choice = p.choices.find(c => c.category === cat);
+  if (!choice) { choice = { category: cat, min: 0, max: 0, clientChoice: false, options: [] }; p.choices.push(choice); }
+  return choice;
+}
+function updateChoiceDraft(e) {
+  const i = Number(e.currentTarget.dataset.i), cat = e.currentTarget.dataset.cat, field = e.currentTarget.dataset.choiceField, foodId = e.currentTarget.dataset.foodId;
+  const p = draftConfig.products[i]; const choice = ensureChoice(p, cat);
+  if (field === 'clientChoice') choice.clientChoice = e.currentTarget.checked;
+  if (field === 'max') { choice.max = Number(e.currentTarget.value || 0); choice.min = choice.max; }
+  if (field === 'option') {
+    if (e.currentTarget.checked && !choice.options.some(o => o.foodId === foodId)) choice.options.push({ foodId, supplement: 0 });
+    if (!e.currentTarget.checked) choice.options = choice.options.filter(o => o.foodId !== foodId);
+  }
+  if (field === 'supplement') { const opt = choice.options.find(o => o.foodId === foodId) || (choice.options.push({ foodId, supplement: 0 }), choice.options.find(o => o.foodId === foodId)); opt.supplement = Number(e.currentTarget.value || 0); }
+  p.choices = (p.choices || []).filter(c => (c.max || 0) > 0 || (c.options || []).length > 0);
+}
+function ensureMenuSection(p, section) {
+  p.menuSections ||= [];
+  let cfg = p.menuSections.find(c => c.section === section);
+  if (!cfg) { cfg = { section, clientChoice: false, max: 1, options: [] }; p.menuSections.push(cfg); }
+  return cfg;
+}
+function updateMenuDraft(e) {
+  const i = Number(e.currentTarget.dataset.i), section = e.currentTarget.dataset.section, field = e.currentTarget.dataset.menuField, productId = e.currentTarget.dataset.productId;
+  const p = draftConfig.products[i]; const cfg = ensureMenuSection(p, section);
+  if (field === 'clientChoice') cfg.clientChoice = e.currentTarget.checked;
+  if (field === 'max') cfg.max = Number(e.currentTarget.value || 0);
+  if (field === 'option') {
+    if (e.currentTarget.checked && !cfg.options.some(o => o.productId === productId)) cfg.options.push({ productId, supplement: 0 });
+    if (!e.currentTarget.checked) cfg.options = cfg.options.filter(o => o.productId !== productId);
+  }
+  if (field === 'supplement') { const opt = cfg.options.find(o => o.productId === productId) || (cfg.options.push({ productId, supplement: 0 }), cfg.options.find(o => o.productId === productId)); opt.supplement = Number(e.currentTarget.value || 0); }
+  p.menuSections = (p.menuSections || []).filter(c => (c.max || 0) > 0 || (c.options || []).length > 0);
+}
+
 function updateProductDraft(e) {
   const i = Number(e.currentTarget.dataset.i), field = e.currentTarget.dataset.product, p = draftConfig.products[i];
-  if (field === 'components') p.components = Array.from(e.currentTarget.selectedOptions).map(o => o.value);
-  else if (field === 'refundable') p.refundable = e.currentTarget.checked;
+  if (field === 'refundable') p.refundable = e.currentTarget.checked;
   else if (field === 'price') p.price = Number(e.currentTarget.value || 0);
   else { p[field] = e.currentTarget.value; if (field === 'category') p.group = displayGroup(p.category); }
-  if (field === 'type' && p.type === 'simple') p.components = [];
-  renderStockEditor(); renderGeneralEditor();
+  if (field === 'type' && p.type === 'simple') { p.components = []; p.choices = []; p.menuSections = []; }
+  if (field === 'type' && p.type === 'compose') { p.menuSections = []; p.choices ||= []; }
+  if (field === 'type' && p.type === 'menu') { p.choices = []; p.menuSections ||= []; }
+  renderProductEditor(); renderStockEditor(); renderGeneralEditor();
 }
+
 function renderFoodEditor() {
   const el = document.getElementById('foodEditor');
   el.innerHTML = draftConfig.baseFoods.map((f, i) => `<div class="editor-row food"><div><small>Nom</small><input data-food="name" data-i="${i}" value="${escapeHtml(f.name)}"></div><div><small>Catégorie</small><select data-food="category" data-i="${i}"><option ${f.category === 'Viande' ? 'selected' : ''}>Viande</option><option ${f.category === 'Accompagnement' ? 'selected' : ''}>Accompagnement</option></select></div><button class="danger" data-delete-food="${i}">Supprimer</button></div>`).join('');
@@ -275,6 +428,8 @@ document.getElementById('btnPrintTicket').addEventListener('click', () => { if (
 document.getElementById('btnClear').addEventListener('click', () => { cart = []; paidCents = 0; renderCart(); });
 document.getElementById('btnExport').addEventListener('click', exportCsv);
 document.getElementById('btnSettings').addEventListener('click', openSettings);
+document.getElementById('btnCloseChoice').addEventListener('click', () => document.getElementById('choiceDialog').close());
+document.getElementById('btnAddChoiceProduct').addEventListener('click', addChoiceProduct);
 document.getElementById('btnCloseSettings').addEventListener('click', () => document.getElementById('settingsDialog').close());
 document.getElementById('btnSaveSettings').addEventListener('click', saveSettings);
 document.getElementById('btnAddFood').addEventListener('click', () => { draftConfig.baseFoods.push({ id: uid('food'), name: 'Nouvel aliment', category: 'Viande', stock: '' }); renderSettings(); });
