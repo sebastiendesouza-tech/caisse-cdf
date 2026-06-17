@@ -1380,7 +1380,7 @@ function startPrintMode(mode) {
   if (printCleanupTimer) clearTimeout(printCleanupTimer);
   document.body.classList.remove("print-ticket", "print-bilan");
   document.body.classList.add(mode);
-  // v26.27 : Safari iPad/AirPrint fait un deuxième rendu quand il passe de A4 à A6.
+  // v26.23 : Safari iPad/AirPrint fait un deuxième rendu quand il passe de A4 à A6.
   // Si on retire la classe print-ticket au focus/afterprint, ce deuxième rendu devient blanc.
   // On conserve donc le mode impression longtemps ; il n'affecte pas l'écran hors @media print.
   printCleanupTimer = setTimeout(cleanupPrintMode, 5 * 60 * 1000);
@@ -1421,7 +1421,7 @@ function buildStandalonePrintHtml(mode, contentHtml) {
       line-height:1.08;
     }
     .ticket h1 { text-align:center; font-size:15pt; margin:0 0 1mm; line-height:1; font-weight:900; }
-    /* v26.27 : rendu iPad calé sur le ticket Mac : titre encadré + corps légèrement agrandi */
+    /* v26.23 : rendu iPad calé sur le ticket Mac : titre encadré + corps légèrement agrandi */
     .ticket-order {
       text-align:center;
       font-size:14pt;
@@ -1484,7 +1484,7 @@ function ensureDirectPrintStyle(mode) {
   if (mode === "print-ticket") {
     style.textContent = `
 @media print {
-  /* v26.27 : nettoyage complet du moteur ticket.
+  /* v26.23 : nettoyage complet du moteur ticket.
      Un seul @page, aucune contre-marge, aucun scale, aucun iframe/fenetre. */
   @page { size: A6 portrait; margin: 0; }
 
@@ -1621,7 +1621,7 @@ function ensureDirectPrintStyle(mode) {
 }
 
 function printCurrentContent(mode) {
-  // v26.27 : retour à l'impression directe de la page principale.
+  // v26.23 : retour à l'impression directe de la page principale.
   // Les versions avec iframe/fenêtre temporaire provoquaient sur iPad le passage A4 -> A6
   // et un ticket visible à la place de l'interface. Ici, seul #printArea est rendu en mode impression.
   ensureDirectPrintStyle(mode);
@@ -1629,14 +1629,14 @@ function printCurrentContent(mode) {
   setTimeout(() => {
     try { window.print(); }
     finally {
-      // v26.27 : garder le mode impression actif pendant le recalcul AirPrint A4 -> A6.
+      // v26.23 : garder le mode impression actif pendant le recalcul AirPrint A4 -> A6.
       if (printCleanupTimer) clearTimeout(printCleanupTimer);
       printCleanupTimer = setTimeout(cleanupPrintMode, 5 * 60 * 1000);
     }
   }, 250);
 }
 
-// v26.27 : ne pas nettoyer sur focus/afterprint.
+// v26.23 : ne pas nettoyer sur focus/afterprint.
 // Sur iPad, ces événements peuvent se déclencher avant le deuxième rendu AirPrint A6,
 // ce qui masquait #printArea et produisait une page blanche.
 window.addEventListener("afterprint", () => {
@@ -2804,50 +2804,5 @@ function bindEvents() {
   document.addEventListener("dblclick", event => event.preventDefault(), { passive: false });
 }
 
-// v26.27 : mise a jour automatique du service worker et rechargement si une nouvelle version est publiee.
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", async () => {
-    const APP_VERSION = "v26.27";
-    let reloadedForUpdate = false;
-
-    try {
-      const registration = await navigator.serviceWorker.register(`service-worker.js?v=${APP_VERSION}`, {
-        updateViaCache: "none"
-      });
-
-      const activateWaitingWorker = () => {
-        if (registration.waiting) {
-          registration.waiting.postMessage({ type: "SKIP_WAITING" });
-        }
-      };
-
-      registration.addEventListener("updatefound", () => {
-        const worker = registration.installing;
-        if (!worker) return;
-        worker.addEventListener("statechange", () => {
-          if (worker.state === "installed" && navigator.serviceWorker.controller) {
-            worker.postMessage({ type: "SKIP_WAITING" });
-          }
-        });
-      });
-
-      navigator.serviceWorker.addEventListener("controllerchange", () => {
-        if (reloadedForUpdate) return;
-        reloadedForUpdate = true;
-        window.location.reload();
-      });
-
-      activateWaitingWorker();
-      registration.update().catch(() => {});
-      setInterval(() => registration.update().catch(() => {}), 60000);
-    } catch (error) {
-      console.warn("Mise a jour automatique indisponible", error);
-    }
-  });
-}
+if ("serviceWorker" in navigator) window.addEventListener("load", () => navigator.serviceWorker.register("service-worker.js"));
 renderProducts(); bindEvents(); renderAll();
-
-// v26.27 : retrait du verrouillage global touchmove.
-// Le blocage agressif empêchait l’ouverture fiable de la fenêtre d’impression sur iPad.
-// On garde le comportement v26.23/v26.24 pour l’impression validée.
-
