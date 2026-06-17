@@ -1382,7 +1382,7 @@ function startPrintMode(mode) {
   document.body.classList.add(mode);
   // Sur iPad/AirPrint, l'aperçu peut se construire lentement. Ne pas enlever
   // le mode impression après 500 ms, sinon une page blanche peut être relancée.
-  printCleanupTimer = setTimeout(cleanupPrintMode, 180000);
+  printCleanupTimer = setTimeout(cleanupPrintMode, 120000);
 }
 
 function buildStandalonePrintHtml(mode, contentHtml) {
@@ -1420,7 +1420,7 @@ function buildStandalonePrintHtml(mode, contentHtml) {
       line-height:1.08;
     }
     .ticket h1 { text-align:center; font-size:15pt; margin:0 0 1mm; line-height:1; font-weight:900; }
-    /* v01.5 : rendu iPad calé sur le ticket Mac : titre encadré + corps légèrement agrandi */
+    /* v01.6 : rendu iPad calé sur le ticket Mac : titre encadré + corps légèrement agrandi */
     .ticket-order {
       text-align:center;
       font-size:14pt;
@@ -1483,7 +1483,7 @@ function ensureDirectPrintStyle(mode) {
   if (mode === "print-ticket") {
     style.textContent = `
 @media print {
-  /* v01.5 : contre-marges AirPrint iPad/Epson.
+  /* v01.6 : contre-marges AirPrint iPad/Epson.
      L'iPad garde environ 15 mm de zone blanche même en A6. On imprime donc
      le ticket dans une couche plus grande, déplacée vers le haut/gauche,
      pour récupérer la zone utile sans toucher aux cases ni aux polices. */
@@ -1540,8 +1540,8 @@ function ensureDirectPrintStyle(mode) {
     transform: none !important;
   }
 
-  body.print-ticket #printArea .ticket h1 { text-align:center !important; font-size:9pt !important; margin:0 0 1mm !important; line-height:1 !important; font-weight:900 !important; }
-  body.print-ticket #printArea .ticket-order { text-align:center !important; font-size:8pt !important; font-weight:900 !important; border:1px solid currentColor !important; padding:.8mm 1mm .7mm !important; margin:0 0 1.2mm !important; line-height:1 !important; }
+  body.print-ticket #printArea .ticket h1 { text-align:center !important; font-size:10pt !important; margin:0 0 1mm !important; line-height:1 !important; font-weight:900 !important; }
+  body.print-ticket #printArea .ticket-order { text-align:center !important; font-size:9pt !important; font-weight:900 !important; border:1px solid currentColor !important; padding:.8mm 1mm .7mm !important; margin:0 0 1.2mm !important; line-height:1 !important; }
   body.print-ticket #printArea .ticket-date { text-align:center !important; font-size:10pt !important; font-weight:800 !important; margin-bottom:1mm !important; }
   body.print-ticket #printArea .ticket-section,
   body.print-ticket #printArea .ticket-caisse { border-top:1px dashed currentColor !important; padding-top:.8mm !important; margin-top:1mm !important; }
@@ -1557,13 +1557,13 @@ function ensureDirectPrintStyle(mode) {
     grid-template-columns:minmax(0,1fr) auto auto !important;
     column-gap:1.7mm !important;
     align-items:center !important;
-    font-size:24pt !important;
+    font-size:19pt !important;
     line-height:1.04 !important;
     font-weight:900 !important;
   }
   body.print-ticket #printArea .ticket-main { min-width:0 !important; }
   body.print-ticket #printArea .ticket-line strong em,
-  body.print-ticket #printArea .ticket-menu-line > strong em { justify-self:end !important; font-size:13pt !important; font-style:normal !important; font-weight:900 !important; white-space:nowrap !important; }
+  body.print-ticket #printArea .ticket-menu-line > strong em { justify-self:end !important; font-size:11.5pt !important; font-style:normal !important; font-weight:900 !important; white-space:nowrap !important; }
 
   body.print-ticket #printArea .ticket-line-detail,
   body.print-ticket #printArea .ticket-menu-detail,
@@ -1572,15 +1572,15 @@ function ensureDirectPrintStyle(mode) {
     margin-left:7mm !important;
     margin-top:.25mm !important;
     margin-bottom:.65mm !important;
-    font-size:14pt !important;
+    font-size:11.5pt !important;
     line-height:1.05 !important;
     font-weight:800 !important;
     font-style:italic !important;
   }
 
-  body.print-ticket #printArea .ticket-checks { display:inline-block !important; white-space:nowrap !important; font-family:Arial, Helvetica, sans-serif !important; font-size:32pt !important; line-height:1 !important; letter-spacing:1mm !important; min-width:7mm !important; text-align:right !important; }
+  body.print-ticket #printArea .ticket-checks { display:inline-block !important; white-space:nowrap !important; font-family:Arial, Helvetica, sans-serif !important; font-size:25pt !important; line-height:1 !important; letter-spacing:.55mm !important; min-width:7mm !important; text-align:right !important; }
   body.print-ticket #printArea .ticket-checks.empty { min-width:7mm !important; }
-  body.print-ticket #printArea .ticket-box { display:inline !important; border:0 !important; width:auto !important; height:auto !important; font-size:32pt !important; line-height:1 !important; font-weight:1000 !important; }
+  body.print-ticket #printArea .ticket-box { display:inline !important; border:0 !important; width:auto !important; height:auto !important; font-size:25pt !important; line-height:1 !important; font-weight:1000 !important; }
 
   body.print-ticket #printArea .ticket-menu-items { margin-left:7mm !important; margin-top:.4mm !important; }
   body.print-ticket #printArea .ticket-menu-item { display:grid !important; grid-template-columns:minmax(0,1fr) auto !important; gap:1.7mm !important; align-items:center !important; font-size:15.5pt !important; line-height:1.04 !important; font-weight:900 !important; }
@@ -1601,7 +1601,7 @@ function ensureDirectPrintStyle(mode) {
 }
 
 function printCurrentContent(mode) {
-  // v01.5 : retour à l'impression directe de la page principale.
+  // v01.6 : retour à l'impression directe de la page principale.
   // Les versions avec iframe/fenêtre temporaire provoquaient sur iPad le passage A4 -> A6
   // et un ticket visible à la place de l'interface. Ici, seul #printArea est rendu en mode impression.
   ensureDirectPrintStyle(mode);
@@ -1611,12 +1611,12 @@ function printCurrentContent(mode) {
     finally {
       // On garde le mode assez longtemps pour laisser AirPrint finir son second rendu.
       if (printCleanupTimer) clearTimeout(printCleanupTimer);
-      printCleanupTimer = setTimeout(cleanupPrintMode, 180000);
+      printCleanupTimer = setTimeout(cleanupPrintMode, 120000);
     }
   }, 250);
 }
 
-/* v01.5 : pas de nettoyage sur afterprint/focus, sinon iPad/Chrome reconstruit l’aperçu avec l’ancien rendu. */
+/* v01.6 : pas de nettoyage sur afterprint/focus pendant le second rendu iPad/Chrome. */
 
 function finishOrder(payment, volunteerName = "") {
   const total = getTotal();
