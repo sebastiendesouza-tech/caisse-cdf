@@ -16,3 +16,19 @@ Version simple HTML/CSS/JavaScript pour GitHub Pages et iPad.
 3. Choisir la branche `main` et le dossier `/root`.
 4. Ouvrir l'URL GitHub Pages sur l'iPad.
 5. Dans Safari : Partager > Ajouter à l'écran d'accueil.
+
+
+## Ajustements ticket compact
+- Les catégories Boisson / Plat / Dessert ne sont plus affichées dans la commande ni sur le ticket.
+- Le menu est affiché de manière compacte : chaque élément avec sa case, composition en retrait.
+
+
+## v15
+- Sélection du bénévole au moment de valider une commande bénévole.
+- Remboursement rapide par produit, sans chercher la commande d’origine.
+- Le remboursement rapide crée une écriture négative dans le bilan et le CSV.
+
+
+## v15
+- Correction choix composés : une seule ligne par aliment, avec compteur quand le nombre à choisir est supérieur à 1.
+- Les quantités sont conservées pour la commande, le ticket et le suivi de stock.

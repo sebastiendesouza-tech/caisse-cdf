@@ -77,14 +77,14 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
   @page { size: A6 portrait; margin: 8mm; }
   .no-print { display: none !important; }
   body { background: white; }
-  .print-ticket { display: block; font-size: 12px; color: var(--ticket-color, black); }
-  .ticket-title { text-align: center; font-size: 19px; font-weight: 900; margin-bottom: 10px; }
-  .ticket-line { display: grid; grid-template-columns: 22px 1fr auto 50px; gap: 5px; align-items: center; padding: 7px 0; border-bottom: 1px dotted currentColor; }
-  .ticket-product { font-size: 18px; font-weight: 900; }
+  .print-ticket { display: block; font-size: 11px; color: var(--ticket-color, black); line-height: 1.15; }
+  .ticket-title { text-align: center; font-size: 18px; font-weight: 900; margin-bottom: 6px; }
+  .ticket-line { display: grid; grid-template-columns: 18px 1fr auto 48px; gap: 4px; align-items: center; padding: 4px 0; border-bottom: 1px dotted currentColor; }
+  .ticket-product { font-size: 16px; font-weight: 900; }
   .checks { letter-spacing: 5px; white-space: nowrap; font-size: 32px; line-height: 1; }
   .remaining-line { display: inline-block; min-width: 42mm; border-bottom: 2px dotted currentColor; height: 14px; }
   .ticket-price { font-size: 12px; }
-  .ticket-bottom { margin-top: 10px; font-size: 14px; font-weight: 800; }
+  .ticket-bottom { margin-top: 6px; font-size: 13px; font-weight: 800; }
 }
 .product-edit-card { border: 1px solid #e5e7eb; border-radius: 14px; padding: 8px; background: #fff; }
 .product-main { grid-template-columns: 1.4fr .7fr .8fr 1fr .8fr; }
@@ -130,3 +130,35 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
 .refund-row { grid-template-columns: 1.8fr .7fr; }
 .refund-row small { display: block; margin-top: 4px; color: #6b7280; }
 @media (max-width: 850px) { .report-cards { grid-template-columns: repeat(2, 1fr); } .top-actions { flex-wrap: wrap; justify-content: flex-end; } }
+.key-double { background: #e0f2fe !important; color: #075985; }
+.pay.volunteer-pay { background: #7c3aed; }
+.payment-buttons { flex-wrap: wrap; }
+.payment-buttons .volunteer-pay { flex-basis: 100%; }
+/* v11 */
+.cart-zone { display: flex; flex-direction: column; overflow: hidden; }
+.cart-lines { flex: 1; overflow-y: auto; min-height: 0; padding-right: 4px; }
+.cart-summary { flex: 0 0 auto; position: sticky; bottom: 0; z-index: 2; border: 2px solid #111827; }
+.meat-stock-box { margin-top: 12px; padding: 10px; border-radius: 14px; background: #f9fafb; border: 2px solid #e5e7eb; }
+.meat-stock-box h3 { margin: 0 0 8px; }
+.meat-stock-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; }
+.meat-stock-item { display: flex; justify-content: space-between; align-items: center; padding: 9px; border-radius: 12px; font-weight: 900; }
+.meat-stock-item.ok { background: #dcfce7; color: #14532d; }
+.meat-stock-item.medium { background: #ffedd5; color: #9a3412; }
+.meat-stock-item.low { background: #fee2e2; color: #991b1b; }
+.meat-stock-item strong { font-size: 22px; }
+@media print {
+  .ticket-main-line .ticket-product { font-size: 16px; }
+  .ticket-subline { display: grid; grid-template-columns: 18px 1fr auto 48px; gap: 4px; align-items: center; padding: 2px 0 2px 10px; border-bottom: 0; }
+  .ticket-subline .ticket-product { font-size: 14px; font-weight: 800; }
+  .ticket-composition { font-size: 11px; font-style: italic; margin-left: 8px; }
+  .ticket-subline .checks { font-size: 22px; }
+}
+.quick-refund-controls { display:flex; gap:8px; align-items:center; justify-content:flex-end; }
+.quick-refund-controls button { width:44px; height:40px; border-radius:10px; border:0; font-size:20px; font-weight:900; background:#e5e7eb; }
+.quick-refund-controls input { width:70px; text-align:center; font-size:18px; font-weight:800; }
+.refund-shortcut { background:#fee2e2 !important; color:#991b1b !important; }
+.counter-choice { display: grid; gap: 8px; }
+.counter-row { display: grid; grid-template-columns: 1fr 44px 48px 44px; align-items: center; gap: 8px; padding: 7px; background: #f3f4f6; border-radius: 10px; font-weight: 800; }
+.counter-row button { min-height: 38px; border: 0; border-radius: 10px; background: #111827; color: #fff; font-size: 20px; font-weight: 900; }
+.counter-row input { text-align: center; font-size: 18px; font-weight: 900; padding: 6px; }
+.choice-total { text-align: right; font-weight: 900; }

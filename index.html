@@ -6,20 +6,20 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="Caisse" />
   <meta name="theme-color" content="#111827" />
-  <title>Caisse manifestation</title>
+  <title>Caisse by SDS</title>
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header class="topbar no-print">
     <div>
-      <h1>Caisse manifestation <span class="version-badge">v9</span></h1>
-      <small id="eventName">Manifestation</small>
+      <h1>Caisse by SDS <span class="version-badge">v15</span></h1>
     </div>
     <div class="top-actions">
       <button id="btnSettings" class="secondary">Paramètres</button>
       <button id="btnOrders" class="secondary">Commandes</button>
       <button id="btnReport" class="secondary">Bilan</button>
+      <button id="btnQuickRefund" class="secondary refund-shortcut">Remboursement</button>
       <button id="btnExport" class="secondary">Export CSV</button>
     </div>
   </header>
@@ -63,7 +63,7 @@
         <button data-key="1">1</button>
         <button data-key="2">2</button>
         <button data-key="3">3</button>
-        <button data-key="clear" class="key-clear">C</button>
+        <button data-key="00" class="key-double">00</button>
         <button data-key="0">0</button>
         <button data-key="back" class="key-back">←</button>
       </div>
@@ -74,6 +74,7 @@
       <div class="payment-buttons">
         <button class="pay cash" data-method="Espèces">Espèces</button>
         <button class="pay card" data-method="CB">CB</button>
+        <button id="btnVolunteer" class="pay volunteer-pay" type="button">Bénévole</button>
       </div>
 
       <p class="payment-hint">Clique sur Espèces ou CB pour valider et imprimer.</p>
@@ -104,6 +105,7 @@
         <button class="tab" data-tab="foods">Aliments</button>
         <button class="tab" data-tab="stocks">Stocks</button>
         <button class="tab" data-tab="general">Général</button>
+        <button class="tab" data-tab="volunteers">Bénévoles</button>
       </div>
       <section id="tab-products" class="tab-panel active">
         <p class="hint">Pour un produit composé ou un menu, choisis les viandes/accompagnements proposés, le nombre à choisir, et un supplément éventuel par aliment.</p>
@@ -126,6 +128,10 @@
         <select id="setTicketColor"><option value="black">Noir</option><option value="blue">Bleu</option><option value="red">Rouge</option></select>
         <h3>Couleur des catégories</h3>
         <div id="categoryColorEditor" class="editor-list"></div>
+      </section>
+      <section id="tab-volunteers" class="tab-panel">
+        <button id="btnAddVolunteer" class="secondary">Ajouter un bénévole</button>
+        <div id="volunteerEditor" class="editor-list"></div>
       </section>
       <div class="settings-actions">
         <button id="btnReset" class="danger">Réinitialiser</button>
@@ -154,6 +160,27 @@
     </div>
   </dialog>
 
+  <dialog id="quickRefundDialog" class="no-print">
+    <div class="settings">
+      <div class="settings-head">
+        <h2>Remboursement rapide</h2>
+        <button id="btnCloseQuickRefund" class="secondary">Fermer</button>
+      </div>
+      <p class="hint">Pour une rupture de stock ou un retour simple : choisis directement le produit à rembourser, sans rechercher la commande d'origine.</p>
+      <label>Filtrer les produits</label>
+      <input id="quickRefundSearch" placeholder="Exemple : bière, assiette, glace..." />
+      <div id="quickRefundLines" class="editor-list"></div>
+      <label>Mode de remboursement</label>
+      <select id="quickRefundMethod"><option>Espèces</option><option>CB</option></select>
+      <label>Raison</label>
+      <input id="quickRefundReason" placeholder="Exemple : rupture de stock" />
+      <div id="quickRefundTotal" class="refund-total">0,00 €</div>
+      <div class="settings-actions">
+        <button id="btnValidateQuickRefund" class="validate">Valider le remboursement</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog id="refundDialog" class="no-print">
     <div class="settings">
       <div class="settings-head">
@@ -169,6 +196,36 @@
       <div id="refundTotal" class="refund-total">0,00 €</div>
       <div class="settings-actions">
         <button id="btnValidateRefund" class="validate">Valider le remboursement</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="volunteerDialog" class="no-print">
+    <div class="settings">
+      <div class="settings-head">
+        <h2>Commande bénévole</h2>
+        <button id="btnCloseVolunteer" class="secondary">Fermer</button>
+      </div>
+      <p class="hint">Le bénévole prend sa commande maintenant et paiera à la fin de la manifestation.</p>
+      <label>Bénévole</label>
+      <select id="volunteerSelect"></select>
+      <div class="settings-actions">
+        <button id="btnValidateVolunteer" class="validate">Valider commande bénévole</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="volunteerPayDialog" class="no-print">
+    <div class="settings">
+      <div class="settings-head">
+        <h2 id="volunteerPayTitle">Paiement bénévole</h2>
+        <button id="btnCloseVolunteerPay" class="secondary">Fermer</button>
+      </div>
+      <p>Total à régler : <strong id="volunteerPaySummary">0,00 €</strong></p>
+      <label>Mode de paiement</label>
+      <select id="volunteerPayMethod"><option>Espèces</option><option>CB</option></select>
+      <div class="settings-actions">
+        <button id="btnValidateVolunteerPayment" class="validate">Valider le règlement</button>
       </div>
     </div>
   </dialog>

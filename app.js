@@ -12,13 +12,16 @@ const PALETTE = {
 };
 
 const DEFAULT_CONFIG = {
+  configVersion: 15,
   eventName: 'Manifestation',
   orderPrefix: 'A',
   ticketColor: 'black',
+  volunteers: [{ id: 'vol-ben-1', name: 'Bénévole 1', active: true }],
   categoryColors: {
     'Boissons sans alcool': 'bleu',
     'Boissons avec alcool': 'orange',
     'Boissons chaudes': 'jaune',
+    'Boissons': 'bleu',
     'Entrée': 'vert',
     'Plat': 'vert',
     'Fromage': 'violet',
@@ -29,45 +32,58 @@ const DEFAULT_CONFIG = {
   baseFoods: [
     { id: 'food-saucisse', name: 'Saucisse', category: 'Viande', stock: '' },
     { id: 'food-merguez', name: 'Merguez', category: 'Viande', stock: '' },
-    { id: 'food-puree', name: 'Purée', category: 'Accompagnement', stock: '' }
+    { id: 'food-frites', name: 'Frites', category: 'Accompagnement', stock: '' }
   ],
   products: [
-    { id: 'p1', group: 'Boissons', category: 'Boissons sans alcool', name: 'Eau', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p2', group: 'Boissons', category: 'Boissons sans alcool', name: 'Soda', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p3', group: 'Boissons', category: 'Boissons sans alcool', name: 'Jus de fruit', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p4', group: 'Boissons', category: 'Boissons sans alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p5', group: 'Boissons', category: 'Boissons sans alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p6', group: 'Boissons', category: 'Boissons sans alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p7', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bière', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p8', group: 'Boissons', category: 'Boissons avec alcool', name: 'Vin', price: 2.5, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p9', group: 'Boissons', category: 'Boissons avec alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p10', group: 'Boissons', category: 'Boissons avec alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p11', group: 'Boissons', category: 'Boissons avec alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p12', group: 'Boissons', category: 'Boissons chaudes', name: 'Café', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p13', group: 'Boissons', category: 'Boissons chaudes', name: 'Thé', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p14', group: 'Boissons', category: 'Boissons chaudes', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p15', group: 'Boissons', category: 'Boissons chaudes', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p16', group: 'Boissons', category: 'Boissons chaudes', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p17', group: 'Restauration', category: 'Entrée', name: 'Entrée', price: 5, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p18', group: 'Restauration', category: 'Plat', name: 'Assiette 2 viandes frites', price: 8, type: 'compose', components: [], choices: [{ category: 'Viande', min: 2, max: 2, clientChoice: true, options: [{ foodId: 'food-saucisse', supplement: 0 }, { foodId: 'food-merguez', supplement: 0 }] }, { category: 'Accompagnement', min: 1, max: 1, clientChoice: false, options: [{ foodId: 'food-puree', supplement: 0 }] }], refundable: true, stock: '' },
-    { id: 'p19', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'compose', components: [], choices: [], refundable: true, stock: '' },
-    { id: 'p20', group: 'Restauration', category: 'Fromage', name: 'Fromage', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p21', group: 'Restauration', category: 'Dessert', name: 'Dessert', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p22', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p23', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p24', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p25', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p26', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p27', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p28', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p29', group: 'Consignes', category: 'Consigne', name: 'Consigne gobelet', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p30', group: 'Consignes', category: 'Retour consigne', name: 'Retour gobelet', price: -1, type: 'simple', components: [], refundable: false, stock: '' }
+    { id: 'p-eau-50', group: 'Boissons', category: 'Boissons sans alcool', name: 'Eau minérale 50 cl', price: 0.50, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-eau-150', group: 'Boissons', category: 'Boissons sans alcool', name: 'Eau minérale 1,5 L', price: 1.50, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-coca', group: 'Boissons', category: 'Boissons sans alcool', name: 'Coca', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-oasis', group: 'Boissons', category: 'Boissons sans alcool', name: 'Oasis', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-ice-tea', group: 'Boissons', category: 'Boissons sans alcool', name: 'Ice Tea', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-biere-25', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bière pression 25 cl', price: 2.50, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-pichet-biere', group: 'Boissons', category: 'Boissons avec alcool', name: 'Pichet bière', price: 9, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-verre-rose', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre rosé', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-verre-blanc', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre blanc', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-verre-rouge', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre rouge', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-bouteille-blanc', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bouteille blanc', price: 11, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-bouteille-rose', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bouteille rosé', price: 11, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-bouteille-rouge', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bouteille rouge', price: 11, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-cremant', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bouteille crémant', price: 13, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-cafe', group: 'Boissons', category: 'Boissons chaudes', name: 'Café', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-boisson-libre', group: 'Boissons', category: 'Boissons sans alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
+
+    { id: 'p-assiette-gourmande', group: 'Restauration', category: 'Plat', name: 'Assiette gourmande', price: 8, type: 'compose', components: [], choices: [
+      { category: 'Viande', min: 2, max: 2, clientChoice: true, options: [{ foodId: 'food-saucisse', supplement: 0 }, { foodId: 'food-merguez', supplement: 0 }] },
+      { category: 'Accompagnement', min: 1, max: 1, clientChoice: false, options: [{ foodId: 'food-frites', supplement: 0 }] }
+    ], refundable: true, stock: '' },
+    { id: 'p-glace-vanille', group: 'Restauration', category: 'Dessert', name: 'Glace vanille', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-popcorn', group: 'Restauration', category: 'Dessert', name: 'Popcorn', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-glace-eau', group: 'Restauration', category: 'Dessert', name: "Glace à l'eau", price: 1, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-frites', group: 'Restauration', category: 'Plat', name: 'Barquette de frites', price: 2.50, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-menu', group: 'Restauration', category: 'Plat', name: 'Menu', price: 10, type: 'menu', components: [], refundable: true, stock: '', menuSections: [
+      { section: 'Boissons', clientChoice: true, max: 1, options: [
+        { productId: 'p-eau-50', supplement: 0 }, { productId: 'p-eau-150', supplement: 0 }, { productId: 'p-coca', supplement: 0 }, { productId: 'p-oasis', supplement: 0 }, { productId: 'p-ice-tea', supplement: 0 },
+        { productId: 'p-verre-rose', supplement: 0.50 }, { productId: 'p-verre-blanc', supplement: 0.50 }, { productId: 'p-verre-rouge', supplement: 0.50 }
+      ]},
+      { section: 'Plat', clientChoice: false, max: 1, options: [{ productId: 'p-assiette-gourmande', supplement: 0 }] },
+      { section: 'Dessert', clientChoice: true, max: 1, options: [{ productId: 'p-glace-vanille', supplement: 0 }, { productId: 'p-glace-eau', supplement: 0 }] }
+    ] },
+    { id: 'p-restau-libre-1', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-restau-libre-2', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-restau-libre-3', group: 'Restauration', category: 'Entrée', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-restau-libre-4', group: 'Restauration', category: 'Fromage', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-restau-libre-5', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-restau-libre-6', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
+
+    { id: 'p-consigne', group: 'Consignes', category: 'Consigne', name: 'Consigne gobelet', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-retour-consigne', group: 'Consignes', category: 'Retour consigne', name: 'Retour gobelet', price: -1, type: 'simple', components: [], refundable: false, stock: '' }
   ]
 };
 
 const GROUP_ORDER = ['Boissons', 'Restauration', 'Consignes'];
-const CATEGORIES = ['Boissons sans alcool', 'Boissons avec alcool', 'Boissons chaudes', 'Entrée', 'Plat', 'Fromage', 'Dessert', 'Consigne', 'Retour consigne'];
-let config = normalizeConfig(JSON.parse(localStorage.getItem('caisse_config') || 'null') || DEFAULT_CONFIG);
+const CATEGORIES = ['Boissons sans alcool', 'Boissons avec alcool', 'Boissons chaudes', 'Boissons', 'Entrée', 'Plat', 'Fromage', 'Dessert', 'Consigne', 'Retour consigne'];
+let storedConfig = JSON.parse(localStorage.getItem('caisse_config') || 'null');
+let config = normalizeConfig((!storedConfig || Number(storedConfig.configVersion || 0) < 12) ? DEFAULT_CONFIG : storedConfig);
 let draftConfig = null;
 let cart = [];
 let paymentMethod = 'Espèces';
@@ -84,6 +100,22 @@ function saveConfig() { localStorage.setItem('caisse_config', JSON.stringify(con
 function saveSales() { localStorage.setItem('caisse_sales', JSON.stringify(sales)); }
 function saveOrderNumber() { localStorage.setItem('caisse_order_number', String(orderNumber)); }
 function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+function compactChoiceOptions(choice) {
+  if (!choice || !Array.isArray(choice.options)) return;
+  const byFood = new Map();
+  choice.options.forEach(opt => {
+    if (!opt || !opt.foodId) return;
+    const prev = byFood.get(opt.foodId);
+    if (!prev) byFood.set(opt.foodId, { ...opt, supplement: Number(opt.supplement || 0) });
+    else prev.supplement = Number(prev.supplement || 0) || Number(opt.supplement || 0);
+  });
+  choice.options = Array.from(byFood.values());
+}
+function compactAllChoices(c) {
+  (c.products || []).forEach(p => {
+    (p.choices || []).forEach(compactChoiceOptions);
+  });
+}
 
 function normalizeConfig(c) {
   const base = clone(DEFAULT_CONFIG);
@@ -91,25 +123,34 @@ function normalizeConfig(c) {
   if (Array.isArray(c.products) && c.products[0] && !c.products[0].id) {
     c.products = c.products.map((p, i) => ({ id: 'p' + (i + 1), group: displayGroup(p.category), category: p.category || 'Plat', name: p.name || '', price: Number(p.price || 0), type: 'simple', components: [], refundable: true, stock: '' }));
   }
+  c.configVersion = 15;
   c.eventName ||= base.eventName;
   c.orderPrefix ||= 'A';
   c.ticketColor ||= 'black';
   c.baseFoods ||= base.baseFoods;
+  c.volunteers ||= base.volunteers;
   c.categoryColors ||= base.categoryColors;
   c.products ||= base.products;
   c.products.forEach((p, i) => { p.id ||= 'p' + (i + 1); p.group ||= displayGroup(p.category); p.type ||= 'simple'; p.components ||= []; p.choices ||= []; p.menuSections ||= []; p.refundable = p.refundable !== false; p.stock ??= ''; });
   c.baseFoods.forEach(f => { f.id ||= uid('food'); f.category ||= 'Viande'; f.stock ??= ''; });
+  c.volunteers.forEach(v => { v.id ||= uid('vol'); v.name ||= 'Bénévole'; v.active = v.active !== false; });
+  compactAllChoices(c);
   return c;
 }
 
 function displayGroup(cat) {
-  if (String(cat).startsWith('Boissons')) return 'Boissons';
+  if (String(cat).startsWith('Boissons') || String(cat) === 'Boisson') return 'Boissons';
   if (String(cat).includes('Consigne') || String(cat).includes('consigne')) return 'Consignes';
   return 'Restauration';
 }
 function groupClass(group) { return 'group-' + slug(group); }
 function slug(s) { return String(s).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
 function escapeHtml(str) { return String(str).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c])); }
+function summarizeNames(names) {
+  const counts = {};
+  (names || []).filter(Boolean).forEach(n => counts[n] = (counts[n] || 0) + 1);
+  return Object.entries(counts).map(([name, qty]) => `${qty > 1 ? qty + ' ' : ''}${name}`).join(' + ');
+}
 function options(arr, selected) { return arr.map(x => `<option ${x === selected ? 'selected' : ''}>${escapeHtml(x)}</option>`).join(''); }
 function paletteOptions(selected) { return Object.entries(PALETTE).map(([k, v]) => `<option value="${k}" ${k === selected ? 'selected' : ''}>${v.label}</option>`).join(''); }
 
@@ -128,7 +169,6 @@ function stockAvailable(product) {
 }
 
 function renderProducts() {
-  document.getElementById('eventName').textContent = config.eventName;
   document.documentElement.style.setProperty('--ticket-color', config.ticketColor);
   const wrap = document.getElementById('categories');
   const groups = {};
@@ -136,8 +176,17 @@ function renderProducts() {
   wrap.innerHTML = GROUP_ORDER.map(group => {
     const products = groups[group] || [];
     return `<div class="category ${groupClass(group)}"><h3>${group}</h3><div class="product-grid">${products.map(productButtonHtml).join('')}</div></div>`;
-  }).join('');
+  }).join('') + renderMeatStockBox();
   document.querySelectorAll('.product-btn:not(.empty-product):not(.out-stock)').forEach(btn => btn.addEventListener('click', () => addProduct(btn.dataset.id)));
+}
+function renderMeatStockBox() {
+  const meats = (config.baseFoods || []).filter(f => String(f.category).toLowerCase() === 'viande' && isTracked(f.stock));
+  if (!meats.length) return '';
+  return `<div class="meat-stock-box"><h3>Stocks viandes</h3><div class="meat-stock-grid">${meats.map(f => {
+    const value = Number(f.stock);
+    const level = value < 10 ? 'low' : (value <= 30 ? 'medium' : 'ok');
+    return `<div class="meat-stock-item ${level}"><span>${escapeHtml(f.name)}</span><strong>${value}</strong></div>`;
+  }).join('')}</div></div>`;
 }
 function productButtonHtml(p) {
   const col = colorFor(p.category);
@@ -154,7 +203,8 @@ function addProduct(id) {
   addCartLine({ id: p.id, name: p.name, price: p.price, qty: 1, refundable: p.refundable, selectedFoods: [] });
 }
 function addCartLine(lineData) {
-  const key = lineData.id + '|' + (lineData.selectedFoods || []).map(x => x.foodId).sort().join(',') + '|' + lineData.price;
+  const foodKey = (lineData.selectedFoods || []).map(x => `${x.foodId}:${x.qty || 1}`).sort().join(',');
+  const key = lineData.id + '|' + foodKey + '|' + (lineData.detail || '') + '|' + lineData.price;
   const line = cart.find(i => i.key === key);
   if (line) line.qty += 1;
   else cart.push({ key, ...lineData });
@@ -186,7 +236,7 @@ function updatePayment() {
   document.getElementById('amountPaidDisplay').textContent = fmt(paidAmount());
   document.getElementById('changeDue').textContent = fmt(Math.max(0, paidAmount() - total()));
 }
-function pressKey(key) { if (key === 'clear') paidCents = 0; else if (key === 'back') paidCents = Math.floor(paidCents / 10); else paidCents = Math.min(999999, paidCents * 10 + Number(key)); updatePayment(); }
+function pressKey(key) { if (key === 'clear') paidCents = 0; else if (key === 'back') paidCents = Math.floor(paidCents / 10); else if (key === '00') paidCents = Math.min(999999, paidCents * 100); else paidCents = Math.min(999999, paidCents * 10 + Number(key)); updatePayment(); }
 function setQuickAmount(amount) { paidCents = Math.round(amount * 100); updatePayment(); }
 function payAndPrint(method) { if (!cart.length) return alert('Commande vide'); paymentMethod = method; if (method === 'CB') paidCents = Math.round(total() * 100); if (method === 'Espèces' && paidAmount() < total()) return alert('Le montant payé est inférieur au total dû.'); updatePayment(); validateSale(); }
 
@@ -202,41 +252,96 @@ function consumeStock() {
       if (food && isTracked(food.stock)) food.stock = Math.max(0, Number(food.stock) - qty);
     });
   };
-  cart.forEach(i => { if (i.price >= 0) { consumeProduct(i.id, i.qty); (i.selectedProducts || []).forEach(pid => consumeProduct(pid, i.qty)); (i.selectedFoods || []).forEach(sel => { const food = config.baseFoods.find(f => f.id === sel.foodId); if (food && isTracked(food.stock)) food.stock = Math.max(0, Number(food.stock) - i.qty); }); } });
+  cart.forEach(i => { if (i.price >= 0) { consumeProduct(i.id, i.qty); (i.selectedProducts || []).forEach(pid => consumeProduct(pid, i.qty)); (i.selectedFoods || []).forEach(sel => { const food = config.baseFoods.find(f => f.id === sel.foodId); if (food && isTracked(food.stock)) food.stock = Math.max(0, Number(food.stock) - i.qty * Number(sel.qty || 1)); }); } });
   saveConfig();
+}
+function checkMarker(qty) {
+  return qty > 5 ? '<span class="remaining-line"></span>' : Array.from({ length: Math.max(0, qty) }, () => '☐').join(' ');
+}
+function ticketLineHtml(name, qty, price, cls = '', withChecks = true) {
+  return `<div class="ticket-line ${cls}"><div>${qty || ''}</div><div class="ticket-product">${escapeHtml(name)}</div><div class="checks">${withChecks ? checkMarker(qty || 1) : ''}</div><div class="ticket-price">${price === null ? '' : fmt(price)}</div></div>`;
 }
 function buildTicket() {
   const number = `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`;
   const lines = cart.map(item => {
-    const marker = item.qty > 5 ? '<span class="remaining-line"></span>' : Array.from({ length: Math.max(0, item.qty) }, () => '☐').join(' ');
-    return `<div class="ticket-line"><div>${item.qty}</div><div class="ticket-product">${escapeHtml(item.name)}</div><div class="checks">${marker}</div><div class="ticket-price">${fmt(item.qty * item.price)}</div></div>`;
+    const mainHasCheck = item.type !== 'menu';
+    let html = ticketLineHtml(item.name, item.qty, item.qty * item.price, 'ticket-main-line', mainHasCheck);
+    if (item.ticketChildren && item.ticketChildren.length) {
+      html += item.ticketChildren.map(child => {
+        const childQty = child.qty || item.qty || 1;
+        const comp = child.composition ? `<div class="ticket-composition">(${escapeHtml(child.composition)})</div>` : '';
+        const checks = child.withCheck === false ? '' : checkMarker(childQty);
+        return `<div class="ticket-subline ${child.withCheck === false ? 'no-check' : ''}"><div>${child.qtyLabel || ''}</div><div><div class="ticket-product">${escapeHtml(child.name)}</div>${comp}</div><div class="checks">${checks}</div><div></div></div>`;
+      }).join('');
+    } else if (item.detail) {
+      html += `<div class="ticket-subline no-check"><div></div><div class="ticket-composition">(${escapeHtml(item.detail)})</div><div></div><div></div></div>`;
+    }
+    return html;
   }).join('');
   document.getElementById('printArea').innerHTML = `<div class="ticket-title">Commande n° ${number}</div>${lines}<div class="ticket-bottom">Paiement : ${paymentMethod}</div><div class="ticket-bottom">Total : ${fmt(total())}</div>`;
 }
-function validateSale() {
+function validateSale(extra = {}) {
   buildTicket();
-  sales.push({ kind: 'sale', orderNumber: `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`, date: new Date().toISOString(), paymentMethod, paid: paidAmount(), change: Math.max(0, paidAmount() - total()), total: total(), items: clone(cart), refunds: [] });
+  const kind = extra.kind || 'sale';
+  sales.push({ kind, orderNumber: `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`, date: new Date().toISOString(), paymentMethod: extra.paymentMethod || paymentMethod, paid: extra.paid ?? paidAmount(), change: extra.change ?? Math.max(0, paidAmount() - total()), total: total(), items: clone(cart), volunteerId: extra.volunteerId || '', volunteerName: extra.volunteerName || '', settled: extra.settled ?? true, refunds: [] });
   consumeStock();
   saveSales();
   window.print();
   orderNumber += 1; saveOrderNumber(); cart = []; paidCents = 0; renderProducts(); renderCart();
 }
 function exportCsv() {
-  const rows = [['type','commande','date','paiement','paye','rendu','produit','quantite','prix_unitaire','total_ligne','total_commande','motif']];
-  sales.forEach(s => (s.items || []).forEach(i => rows.push([s.kind || 'sale', s.orderNumber, s.date, s.paymentMethod, s.paid || '', s.change || '', i.name, i.qty, i.price, i.qty * i.price, s.total, s.reason || ''])));
+  const rows = [['type','commande','date','paiement','benevole','regle','paye','rendu','produit','quantite','prix_unitaire','total_ligne','total_commande','motif']];
+  sales.forEach(s => (s.items || []).forEach(i => rows.push([s.kind || 'sale', s.orderNumber, s.date, s.paymentMethod, s.volunteerName || '', s.settled === false ? 'non' : 'oui', s.paid || '', s.change || '', i.name, i.qty, i.price, i.qty * i.price, s.total, s.reason || ''])));
   const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ventes-caisse.csv'; a.click();
 }
 
 
+function renderChoiceControls(choice, foods, mode, prefix) {
+  const required = Number(choice.max || 0);
+  if (!choice.clientChoice) {
+    return foods.map(({ opt, food }) => `<label class="choice-option"><input type="checkbox" data-${mode}-fixed="${prefix}" data-food-id="${food.id}" checked disabled> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('');
+  }
+  if (required <= 1) {
+    return foods.map(({ opt, food }, idx) => `<label class="choice-option"><input type="radio" name="${mode}-${prefix}" data-${mode}-single="${prefix}" data-food-id="${food.id}" ${idx === 0 ? 'checked' : ''}> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('');
+  }
+  return `<div class="counter-choice" data-required="${required}" data-counter-group="${mode}-${prefix}">${foods.map(({ opt, food }) => `<div class="counter-row"><span>${escapeHtml(food.name)} ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</span><button type="button" data-count-delta="-1" data-target="${mode}-${prefix}-${food.id}">-</button><input readonly data-${mode}-count="${prefix}" data-food-id="${food.id}" id="${mode}-${prefix}-${food.id}" value="0"><button type="button" data-count-delta="1" data-target="${mode}-${prefix}-${food.id}">+</button></div>`).join('')}<div class="choice-total">Total : <span data-counter-total="${mode}-${prefix}">0</span> / ${required}</div></div>`;
+}
+function readChoiceSelection(choice, foods, mode, prefix, productName) {
+  const required = Number(choice.max || 0);
+  let selectedFoods = [], supplements = 0, details = [], totalChosen = 0;
+  const addFood = (foodId, qty = 1) => {
+    qty = Number(qty || 0);
+    if (qty <= 0) return;
+    const row = foods.find(x => x.food.id === foodId);
+    if (!row) return;
+    selectedFoods.push({ foodId, name: row.food.name, qty });
+    details.push(qty > 1 ? `${qty} ${row.food.name}${row.food.name.endsWith('s') ? '' : 's'}` : row.food.name);
+    supplements += Number(row.opt?.supplement || 0) * qty;
+    totalChosen += qty;
+  };
+  if (!choice.clientChoice) {
+    foods.forEach(({ food }) => addFood(food.id, 1));
+    return { selectedFoods, supplements, details };
+  }
+  if (required <= 1) {
+    const input = document.querySelector(`[data-${mode}-single="${prefix}"]:checked`);
+    if (!input) throw new Error(`Il faut choisir ${choice.category.toLowerCase()} pour ${productName}.`);
+    addFood(input.dataset.foodId, 1);
+    return { selectedFoods, supplements, details };
+  }
+  Array.from(document.querySelectorAll(`[data-${mode}-count="${prefix}"]`)).forEach(input => addFood(input.dataset.foodId, Number(input.value || 0)));
+  if (totalChosen !== required) throw new Error(`Il faut choisir ${required} ${choice.category.toLowerCase()} pour ${productName}.`);
+  return { selectedFoods, supplements, details };
+}
 function openChoiceDialog(product) {
   pendingChoiceProduct = product;
   document.getElementById('choiceTitle').textContent = product.name;
   document.getElementById('choiceBody').innerHTML = (product.choices || []).map((choice, ci) => {
     const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
     const count = choice.max || 0;
-    return `<div class="choice-block"><h3>${choice.category} ${choice.clientChoice ? `(choisir ${count})` : ''}</h3>${foods.map(({ opt, food }) => `<label class="choice-option"><input type="checkbox" data-choice-select="${ci}" data-food-id="${food.id}" ${!choice.clientChoice ? 'checked disabled' : ''}> <span>${escapeHtml(food.name)}</span> ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('')}</div>`;
+    return `<div class="choice-block"><h3>${choice.category} ${choice.clientChoice ? `(choisir ${count})` : ''}</h3>${renderChoiceControls(choice, foods, 'choice', String(ci))}</div>`;
   }).join('');
   document.getElementById('choiceDialog').showModal();
 }
@@ -244,13 +349,15 @@ function addChoiceProduct() {
   const p = pendingChoiceProduct; if (!p) return;
   if (p.type === 'menu') return addMenuProduct();
   let selectedFoods = [], supplements = 0, details = [];
-  for (let ci = 0; ci < (p.choices || []).length; ci++) {
-    const choice = p.choices[ci], required = choice.max || 0;
-    const checked = Array.from(document.querySelectorAll(`[data-choice-select="${ci}"]:checked`)).map(x => x.dataset.foodId);
-    if (choice.clientChoice && checked.length !== required) return alert(`Il faut choisir ${required} ${choice.category.toLowerCase()}.`);
-    checked.forEach(foodId => { const opt = (choice.options || []).find(o => o.foodId === foodId); const food = config.baseFoods.find(f => f.id === foodId); if (food) { selectedFoods.push({ foodId, name: food.name }); details.push(food.name); supplements += Number(opt?.supplement || 0); } });
-  }
-  addCartLine({ id: p.id, name: p.name, detail: details.join(' + '), price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods });
+  try {
+    for (let ci = 0; ci < (p.choices || []).length; ci++) {
+      const choice = p.choices[ci];
+      const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
+      const result = readChoiceSelection(choice, foods, 'choice', String(ci), p.name);
+      selectedFoods.push(...result.selectedFoods); supplements += result.supplements; details.push(...result.details);
+    }
+  } catch (err) { return alert(err.message); }
+  addCartLine({ id: p.id, name: p.name, detail: summarizeNames(details), ticketChildren: [{ name: '', composition: summarizeNames(details), withCheck: false }], price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods });
   document.getElementById('choiceDialog').close();
   pendingChoiceProduct = null;
 }
@@ -258,22 +365,19 @@ function renderComposeChoiceHtml(product, prefix) {
   return (product.choices || []).map((choice, ci) => {
     const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
     const count = choice.max || 0;
-    return `<div class="nested-choice"><strong>${choice.category} ${choice.clientChoice ? `(choisir ${count})` : ''}</strong>${foods.map(({ opt, food }) => `<label class="choice-option"><input type="checkbox" data-compose-choice="${prefix}-${ci}" data-food-id="${food.id}" ${!choice.clientChoice ? 'checked disabled' : ''}> ${escapeHtml(food.name)} ${opt.supplement ? `<strong>+${fmt(opt.supplement)}</strong>` : ''}</label>`).join('')}</div>`;
+    const key = `${prefix}-${ci}`;
+    return `<div class="nested-choice"><strong>${choice.category} ${choice.clientChoice ? `(choisir ${count})` : ''}</strong>${renderChoiceControls(choice, foods, 'compose', key)}</div>`;
   }).join('');
 }
 function collectComposeChoices(product, prefix) {
   let selectedFoods = [], supplements = 0, detailParts = [];
   for (let ci = 0; ci < (product.choices || []).length; ci++) {
-    const choice = product.choices[ci], required = choice.max || 0;
-    const checked = Array.from(document.querySelectorAll(`[data-compose-choice="${prefix}-${ci}"]:checked`)).map(x => x.dataset.foodId);
-    if (choice.clientChoice && checked.length !== required) throw new Error(`Il faut choisir ${required} ${choice.category.toLowerCase()} pour ${product.name}.`);
-    checked.forEach(foodId => {
-      const opt = (choice.options || []).find(o => o.foodId === foodId);
-      const food = config.baseFoods.find(f => f.id === foodId);
-      if (food) { selectedFoods.push({ foodId, name: food.name }); detailParts.push(food.name); supplements += Number(opt?.supplement || 0); }
-    });
+    const choice = product.choices[ci];
+    const foods = (choice.options || []).map(opt => ({ opt, food: config.baseFoods.find(f => f.id === opt.foodId) })).filter(x => x.food);
+    const result = readChoiceSelection(choice, foods, 'compose', `${prefix}-${ci}`, product.name);
+    selectedFoods.push(...result.selectedFoods); supplements += result.supplements; detailParts.push(...result.details);
   }
-  return { selectedFoods, supplements, detail: detailParts.join(' + ') };
+  return { selectedFoods, supplements, detail: summarizeNames(detailParts) };
 }
 function openMenuDialog(product) {
   pendingChoiceProduct = product;
@@ -287,7 +391,7 @@ function openMenuDialog(product) {
 }
 function addMenuProduct() {
   const p = pendingChoiceProduct; if (!p) return;
-  let selectedFoods = [], selectedProducts = [], supplements = 0, details = [];
+  let selectedFoods = [], selectedProducts = [], supplements = 0, details = [], ticketChildren = [];
   try {
     for (let si = 0; si < (p.menuSections || []).length; si++) {
       const section = p.menuSections[si], required = section.max || 1;
@@ -298,7 +402,7 @@ function addMenuProduct() {
         const opt = (section.options || []).find(o => o.productId === input.dataset.productId);
         if (!product) return;
         selectedProducts.push(product.id);
-        let detail = `${section.section}: ${product.name}`;
+        let detail = `${product.name}`;
         supplements += Number(opt?.supplement || 0);
         if (product.type === 'compose') {
           const oi = (section.options || []).findIndex(o => o.productId === input.dataset.productId);
@@ -306,18 +410,20 @@ function addMenuProduct() {
           selectedFoods.push(...nested.selectedFoods);
           supplements += nested.supplements;
           if (nested.detail) detail += ` (${nested.detail})`;
+          ticketChildren.push({ qtyLabel: '1', name: `${product.name}`, composition: nested.detail });
         }
         details.push(detail);
+        if (product.type !== 'compose') ticketChildren.push({ qtyLabel: '1', name: `${product.name}` });
       });
     }
   } catch (err) { return alert(err.message); }
-  addCartLine({ id: p.id, name: p.name, detail: details.join(' / '), price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods, selectedProducts });
+  addCartLine({ id: p.id, name: p.name, type: 'menu', detail: details.join(' / '), ticketChildren, price: Number(p.price || 0) + supplements, qty: 1, refundable: p.refundable, selectedFoods, selectedProducts });
   document.getElementById('choiceDialog').close();
   pendingChoiceProduct = null;
 }
 
 function openSettings() { draftConfig = clone(config); renderSettings(); document.getElementById('settingsDialog').showModal(); }
-function renderSettings() { renderProductEditor(); renderFoodEditor(); renderStockEditor(); renderGeneralEditor(); }
+function renderSettings() { renderProductEditor(); renderFoodEditor(); renderStockEditor(); renderGeneralEditor(); renderVolunteerEditor(); }
 function renderProductEditor() {
   const el = document.getElementById('productEditor');
   el.innerHTML = draftConfig.products.map((p, i) => {
@@ -337,10 +443,10 @@ function renderChoiceEditor(p, i) {
   }).join('')}</div>`;
 }
 function renderMenuEditor(p, i) {
-  const sections = ['Entrée', 'Plat', 'Fromage', 'Dessert'];
+  const sections = ['Boissons', 'Entrée', 'Plat', 'Fromage', 'Dessert'];
   return `<div class="menu-edit"><h4>Réglage menu</h4><p class="hint">Chaque rubrique peut être fixe ou laissée au choix du client. Le plat peut être un produit simple ou un produit composé déjà paramétré.</p>${sections.map(section => {
     let cfg = (p.menuSections || []).find(c => c.section === section) || { section, clientChoice: false, max: 1, options: [] };
-    const candidates = draftConfig.products.filter(prod => prod.id !== p.id && prod.name && prod.category === section);
+    const candidates = draftConfig.products.filter(prod => prod.id !== p.id && prod.name && (prod.category === section || (section === 'Boissons' && displayGroup(prod.category) === 'Boissons')));
     return `<div class="menu-section"><h4>${section}</h4><div class="menu-rules"><label><input type="checkbox" data-menu-field="clientChoice" data-i="${i}" data-section="${section}" ${cfg.clientChoice ? 'checked' : ''}> Choix laissé au client</label><label>Nombre à choisir <input type="number" min="0" data-menu-field="max" data-i="${i}" data-section="${section}" value="${cfg.max || 1}"></label></div>${candidates.length ? candidates.map(prod => { const opt = (cfg.options || []).find(o => o.productId === prod.id); return `<div class="option-line"><label><input type="checkbox" data-menu-field="option" data-i="${i}" data-section="${section}" data-product-id="${prod.id}" ${opt ? 'checked' : ''}> ${escapeHtml(prod.name)} <small>(${prod.type === 'compose' ? 'composé' : 'simple'})</small></label><label>Supplément <input type="number" step="0.01" data-menu-field="supplement" data-i="${i}" data-section="${section}" data-product-id="${prod.id}" value="${opt?.supplement || 0}"></label></div>`; }).join('') : '<p class="hint">Aucun produit dans cette catégorie.</p>'}</div>`;
   }).join('')}</div>`;
 }
@@ -398,6 +504,14 @@ function renderFoodEditor() {
   el.querySelectorAll('[data-food]').forEach(x => x.addEventListener('change', e => { const f = draftConfig.baseFoods[Number(e.currentTarget.dataset.i)]; f[e.currentTarget.dataset.food] = e.currentTarget.value; renderProductEditor(); renderStockEditor(); }));
   el.querySelectorAll('[data-delete-food]').forEach(b => b.addEventListener('click', e => { const i = Number(e.currentTarget.dataset.deleteFood); draftConfig.baseFoods.splice(i, 1); draftConfig.products.forEach(p => p.components = (p.components || []).filter(id => draftConfig.baseFoods.some(f => f.id === id) || draftConfig.products.some(pp => pp.id === id))); renderSettings(); }));
 }
+
+function renderVolunteerEditor() {
+  const el = document.getElementById('volunteerEditor');
+  if (!el) return;
+  el.innerHTML = (draftConfig.volunteers || []).map((v, i) => `<div class="editor-row food"><div><small>Nom</small><input data-volunteer="name" data-i="${i}" value="${escapeHtml(v.name)}"></div><div class="checkline"><input type="checkbox" data-volunteer="active" data-i="${i}" ${v.active !== false ? 'checked' : ''}> Actif</div><button class="danger" data-delete-volunteer="${i}">Supprimer</button></div>`).join('') || '<p>Aucun bénévole.</p>';
+  el.querySelectorAll('[data-volunteer]').forEach(x => x.addEventListener('change', e => { const v = draftConfig.volunteers[Number(e.currentTarget.dataset.i)]; if (e.currentTarget.dataset.volunteer === 'active') v.active = e.currentTarget.checked; else v.name = e.currentTarget.value; }));
+  el.querySelectorAll('[data-delete-volunteer]').forEach(b => b.addEventListener('click', e => { draftConfig.volunteers.splice(Number(e.currentTarget.dataset.deleteVolunteer), 1); renderVolunteerEditor(); }));
+}
 function renderStockEditor() {
   const el = document.getElementById('stockEditor');
   const productRows = draftConfig.products.filter(p => p.name && p.type === 'simple').map(p => ({ kind: 'product', id: p.id, label: 'Produit simple - ' + p.name, value: p.stock }));
@@ -421,6 +535,89 @@ function saveSettings() {
 }
 
 
+
+function openVolunteerDialog() {
+  if (!cart.length) return alert('Commande vide');
+  const active = (config.volunteers || []).filter(v => v.active !== false);
+  if (!active.length) return alert('Ajoute au moins un bénévole dans Paramètres > Bénévoles.');
+  document.getElementById('volunteerSelect').innerHTML = active.map(v => `<option value="${escapeHtml(v.id)}">${escapeHtml(v.name)}</option>`).join('');
+  document.getElementById('volunteerDialog').showModal();
+}
+function validateVolunteerOrder() {
+  const id = document.getElementById('volunteerSelect').value;
+  const v = (config.volunteers || []).find(x => x.id === id);
+  if (!v) return alert('Bénévole introuvable.');
+  paymentMethod = 'Bénévole';
+  paidCents = 0;
+  updatePayment();
+  document.getElementById('volunteerDialog').close();
+  validateSale({ kind: 'volunteer', paymentMethod: 'Bénévole - à régler', paid: 0, change: 0, volunteerId: v.id, volunteerName: v.name, settled: false });
+}
+let volunteerPayOrderNumber = null;
+function volunteerPendingAmount(volunteerId) {
+  return sales.filter(s => s.kind === 'volunteer' && s.volunteerId === volunteerId && s.settled === false).reduce((sum, s) => sum + Number(s.total || 0), 0);
+}
+function openVolunteerPayment(volunteerId) {
+  const v = (config.volunteers || []).find(x => x.id === volunteerId) || { name: volunteerId };
+  volunteerPayOrderNumber = volunteerId;
+  document.getElementById('volunteerPayTitle').textContent = `Paiement bénévole - ${v.name}`;
+  document.getElementById('volunteerPaySummary').textContent = fmt(volunteerPendingAmount(volunteerId));
+  document.getElementById('volunteerPayDialog').showModal();
+}
+function validateVolunteerPayment() {
+  const volunteerId = volunteerPayOrderNumber;
+  const amount = volunteerPendingAmount(volunteerId);
+  if (!amount) return alert('Rien à régler.');
+  const method = document.getElementById('volunteerPayMethod').value;
+  sales.forEach(s => { if (s.kind === 'volunteer' && s.volunteerId === volunteerId && s.settled === false) { s.settled = true; s.paymentMethod = `Bénévole réglé ${method}`; } });
+  sales.push({ kind: 'volunteer_payment', orderNumber: `BEN-${Date.now().toString().slice(-6)}`, date: new Date().toISOString(), paymentMethod: method, paid: amount, change: 0, total: amount, volunteerId, volunteerName: ((config.volunteers || []).find(v => v.id === volunteerId) || {}).name || '', items: [{ name: 'Règlement bénévole', qty: 1, price: amount, refundable: false }] });
+  saveSales();
+  document.getElementById('volunteerPayDialog').close();
+  openReport();
+}
+
+let quickRefundFilter = '';
+function quickRefundProducts() {
+  const q = quickRefundFilter.trim().toLowerCase();
+  return (config.products || []).filter(p => p.name && p.refundable !== false && Number(p.price || 0) > 0 && (!q || p.name.toLowerCase().includes(q) || String(p.category || '').toLowerCase().includes(q)));
+}
+function openQuickRefund() {
+  quickRefundFilter = '';
+  document.getElementById('quickRefundSearch').value = '';
+  document.getElementById('quickRefundMethod').value = 'Espèces';
+  document.getElementById('quickRefundReason').value = 'Rupture de stock';
+  renderQuickRefundLines();
+  document.getElementById('quickRefundDialog').showModal();
+}
+function renderQuickRefundLines() {
+  const products = quickRefundProducts();
+  document.getElementById('quickRefundLines').innerHTML = products.map((p, idx) => `<div class="editor-row refund-row quick-refund-row"><div><strong>${escapeHtml(p.name)}</strong><small>${fmt(p.price)} / unité</small></div><div class="quick-refund-controls"><button type="button" data-quick-refund-minus="${idx}">-</button><input type="number" min="0" value="0" data-quick-refund-qty="${idx}" data-product-id="${escapeHtml(p.id)}"><button type="button" data-quick-refund-plus="${idx}">+</button></div></div>`).join('') || '<p>Aucun produit remboursable.</p>';
+  document.querySelectorAll('[data-quick-refund-qty]').forEach(x => x.addEventListener('input', updateQuickRefundTotal));
+  document.querySelectorAll('[data-quick-refund-minus]').forEach(b => b.addEventListener('click', e => { const input = document.querySelector(`[data-quick-refund-qty="${e.currentTarget.dataset.quickRefundMinus}"]`); input.value = Math.max(0, Number(input.value || 0) - 1); updateQuickRefundTotal(); }));
+  document.querySelectorAll('[data-quick-refund-plus]').forEach(b => b.addEventListener('click', e => { const input = document.querySelector(`[data-quick-refund-qty="${e.currentTarget.dataset.quickRefundPlus}"]`); input.value = Number(input.value || 0) + 1; updateQuickRefundTotal(); }));
+  updateQuickRefundTotal();
+}
+function selectedQuickRefundItems() {
+  return Array.from(document.querySelectorAll('[data-quick-refund-qty]')).map(input => {
+    const qty = Math.max(0, Number(input.value || 0));
+    const p = config.products.find(x => x.id === input.dataset.productId);
+    return qty > 0 && p ? { id: p.id, name: p.name, qty: -qty, price: Number(p.price || 0), refundable: false } : null;
+  }).filter(Boolean);
+}
+function updateQuickRefundTotal() {
+  const totalRefund = Math.abs(selectedQuickRefundItems().reduce((sum, i) => sum + i.qty * i.price, 0));
+  document.getElementById('quickRefundTotal').textContent = fmt(totalRefund);
+}
+function validateQuickRefund() {
+  const items = selectedQuickRefundItems();
+  if (!items.length) return alert('Choisis au moins un produit à rembourser.');
+  const refundTotal = items.reduce((sum, i) => sum + i.qty * i.price, 0);
+  sales.push({ kind: 'refund', orderNumber: `RAP-${Date.now().toString().slice(-6)}`, originalOrderNumber: '', date: new Date().toISOString(), paymentMethod: document.getElementById('quickRefundMethod').value, paid: refundTotal, change: 0, total: refundTotal, reason: document.getElementById('quickRefundReason').value.trim() || 'Remboursement rapide', items });
+  saveSales();
+  document.getElementById('quickRefundDialog').close();
+  openReport();
+}
+
 let refundSaleIndex = null;
 function saleTotal(s) { return Number(s.total || 0); }
 function refundAmountForSale(orderNumber) { return sales.filter(x => x.kind === 'refund' && x.originalOrderNumber === orderNumber).reduce((sum, r) => sum + Math.abs(Number(r.total || 0)), 0); }
@@ -428,6 +625,8 @@ function netSaleTotal(s) { return saleTotal(s) - refundAmountForSale(s.orderNumb
 function formatDate(iso) { try { return new Date(iso).toLocaleString('fr-FR'); } catch { return iso || ''; } }
 function paymentTotals() {
   return sales.reduce((acc, s) => {
+    const kind = s.kind || 'sale';
+    if (kind === 'volunteer') return acc;
     const method = s.paymentMethod || 'Inconnu';
     acc[method] ||= 0;
     acc[method] += Number(s.total || 0);
@@ -438,6 +637,7 @@ function openReport() {
   const totals = paymentTotals();
   const gross = sales.filter(s => (s.kind || 'sale') === 'sale').reduce((a,s)=>a+Number(s.total||0),0);
   const refunds = sales.filter(s => s.kind === 'refund').reduce((a,s)=>a+Math.abs(Number(s.total||0)),0);
+  const volunteerPending = sales.filter(s => s.kind === 'volunteer' && s.settled === false).reduce((a,s)=>a+Number(s.total||0),0);
   const net = gross - refunds;
   const productMap = {};
   sales.forEach(s => (s.items || []).forEach(i => {
@@ -446,15 +646,19 @@ function openReport() {
     productMap[i.name].total += Number(i.qty || 0) * Number(i.price || 0);
   }));
   const productRows = Object.entries(productMap).sort((a,b)=>Math.abs(b[1].total)-Math.abs(a[1].total)).map(([name,v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`).join('');
-  document.getElementById('reportContent').innerHTML = `<div class="report-cards"><div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net</strong><span>${fmt(net)}</span></div><div><strong>Commandes</strong><span>${sales.filter(s => (s.kind || 'sale') === 'sale').length}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Par produit</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucune vente</td></tr>'}</tbody></table>`;
+  document.getElementById('reportContent').innerHTML = `<div class="report-cards"><div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${sales.filter(s => (s.kind || 'sale') === 'sale').length}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Par produit</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucune vente</td></tr>'}</tbody></table>`;
+  const volunteerRows = (config.volunteers || []).map(v => ({ v, amount: volunteerPendingAmount(v.id) })).filter(x => x.amount > 0).map(x => `<tr><td>${escapeHtml(x.v.name)}</td><td>${fmt(x.amount)}</td><td><button class="validate" data-pay-volunteer="${escapeHtml(x.v.id)}">Régler</button></td></tr>`).join('');
+  document.getElementById('reportContent').insertAdjacentHTML('beforeend', `<h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`);
+  document.querySelectorAll('[data-pay-volunteer]').forEach(b => b.addEventListener('click', e => openVolunteerPayment(e.currentTarget.dataset.payVolunteer)));
   document.getElementById('reportDialog').showModal();
 }
 function openOrders() {
   const saleRows = sales.map((s, idx) => {
     const isRefund = s.kind === 'refund';
+    const isVolunteer = s.kind === 'volunteer';
     const items = (s.items || []).map(i => `${i.qty} x ${escapeHtml(i.name)} (${fmt(i.qty * i.price)})`).join('<br>');
-    const refundInfo = !isRefund ? `<div class="hint">Déjà remboursé : ${fmt(refundAmountForSale(s.orderNumber))} / Net : ${fmt(netSaleTotal(s))}</div>` : `<div class="hint">Remboursement de ${escapeHtml(s.originalOrderNumber || '')} - ${escapeHtml(s.reason || '')}</div>`;
-    const btn = (!isRefund && netSaleTotal(s) > 0) ? `<button class="danger" data-refund-sale="${idx}">Rembourser</button>` : '';
+    const refundInfo = isVolunteer ? `<div class="hint">Bénévole : ${escapeHtml(s.volunteerName || '')} - ${s.settled === false ? 'à régler' : 'réglé'}</div>` : (!isRefund ? `<div class="hint">Déjà remboursé : ${fmt(refundAmountForSale(s.orderNumber))} / Net : ${fmt(netSaleTotal(s))}</div>` : `<div class="hint">Remboursement de ${escapeHtml(s.originalOrderNumber || '')} - ${escapeHtml(s.reason || '')}</div>`);
+    const btn = (!isRefund && !isVolunteer && netSaleTotal(s) > 0) ? `<button class="danger" data-refund-sale="${idx}">Rembourser</button>` : '';
     return `<div class="order-card ${isRefund ? 'refund-card' : ''}"><div><strong>${isRefund ? 'Remboursement' : 'Commande'} n° ${escapeHtml(s.orderNumber)}</strong><span>${formatDate(s.date)}</span></div><div>${items}</div><div class="order-bottom"><b>${fmt(s.total)}</b><span>${escapeHtml(s.paymentMethod || '')}</span>${btn}</div>${refundInfo}</div>`;
   }).reverse().join('');
   document.getElementById('ordersList').innerHTML = saleRows || '<p>Aucune commande enregistrée.</p>';
@@ -502,10 +706,19 @@ function validateRefund() {
 document.querySelectorAll('[data-key]').forEach(btn => btn.addEventListener('click', () => pressKey(btn.dataset.key)));
 document.querySelectorAll('[data-quick]').forEach(btn => btn.addEventListener('click', () => setQuickAmount(Number(btn.dataset.quick))));
 document.getElementById('btnExact').addEventListener('click', () => setQuickAmount(total()));
-document.querySelectorAll('.pay').forEach(btn => btn.addEventListener('click', () => payAndPrint(btn.dataset.method)));
+document.querySelectorAll('.pay[data-method]').forEach(btn => btn.addEventListener('click', () => payAndPrint(btn.dataset.method)));
 document.getElementById('btnPrintTicket').addEventListener('click', () => { if (cart.length) { buildTicket(); window.print(); } });
 document.getElementById('btnClear').addEventListener('click', () => { cart = []; paidCents = 0; renderCart(); });
 document.getElementById('btnExport').addEventListener('click', exportCsv);
+document.getElementById('btnQuickRefund').addEventListener('click', openQuickRefund);
+document.getElementById('btnCloseQuickRefund').addEventListener('click', () => document.getElementById('quickRefundDialog').close());
+document.getElementById('btnValidateQuickRefund').addEventListener('click', validateQuickRefund);
+document.getElementById('quickRefundSearch').addEventListener('input', e => { quickRefundFilter = e.currentTarget.value; renderQuickRefundLines(); });
+document.getElementById('btnVolunteer').addEventListener('click', openVolunteerDialog);
+document.getElementById('btnCloseVolunteer').addEventListener('click', () => document.getElementById('volunteerDialog').close());
+document.getElementById('btnValidateVolunteer').addEventListener('click', validateVolunteerOrder);
+document.getElementById('btnCloseVolunteerPay').addEventListener('click', () => document.getElementById('volunteerPayDialog').close());
+document.getElementById('btnValidateVolunteerPayment').addEventListener('click', validateVolunteerPayment);
 document.getElementById('btnOrders').addEventListener('click', openOrders);
 document.getElementById('btnReport').addEventListener('click', openReport);
 document.getElementById('btnCloseOrders').addEventListener('click', () => document.getElementById('ordersDialog').close());
@@ -513,11 +726,31 @@ document.getElementById('btnCloseReport').addEventListener('click', () => docume
 document.getElementById('btnCloseRefund').addEventListener('click', () => document.getElementById('refundDialog').close());
 document.getElementById('btnValidateRefund').addEventListener('click', validateRefund);
 document.getElementById('btnSettings').addEventListener('click', openSettings);
+
+document.addEventListener('click', e => {
+  const btn = e.target.closest('[data-count-delta]');
+  if (!btn) return;
+  const input = document.getElementById(btn.dataset.target);
+  if (!input) return;
+  const group = btn.dataset.target.split('-').slice(0, -1).join('-');
+  const wrapper = document.querySelector(`[data-counter-group="${group}"]`);
+  const required = Number(wrapper?.dataset.required || 0);
+  const inputs = Array.from(document.querySelectorAll(`[id^="${group}-"]`));
+  const currentTotal = inputs.reduce((sum, x) => sum + Number(x.value || 0), 0);
+  const delta = Number(btn.dataset.countDelta || 0);
+  if (delta > 0 && currentTotal >= required) return;
+  input.value = Math.max(0, Number(input.value || 0) + delta);
+  const newTotal = inputs.reduce((sum, x) => sum + Number(x.value || 0), 0);
+  const totalEl = document.querySelector(`[data-counter-total="${group}"]`);
+  if (totalEl) totalEl.textContent = String(newTotal);
+});
+
 document.getElementById('btnCloseChoice').addEventListener('click', () => document.getElementById('choiceDialog').close());
 document.getElementById('btnAddChoiceProduct').addEventListener('click', addChoiceProduct);
 document.getElementById('btnCloseSettings').addEventListener('click', () => document.getElementById('settingsDialog').close());
 document.getElementById('btnSaveSettings').addEventListener('click', saveSettings);
 document.getElementById('btnAddFood').addEventListener('click', () => { draftConfig.baseFoods.push({ id: uid('food'), name: 'Nouvel aliment', category: 'Viande', stock: '' }); renderSettings(); });
+document.getElementById('btnAddVolunteer').addEventListener('click', () => { draftConfig.volunteers ||= []; draftConfig.volunteers.push({ id: uid('vol'), name: 'Nouveau bénévole', active: true }); renderVolunteerEditor(); });
 document.getElementById('btnReset').addEventListener('click', () => { if (confirm('Réinitialiser tous les paramètres ?')) { draftConfig = clone(DEFAULT_CONFIG); renderSettings(); } });
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(b => b.classList.remove('active')); document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active')); btn.classList.add('active'); document.getElementById('tab-' + btn.dataset.tab).classList.add('active'); }));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
