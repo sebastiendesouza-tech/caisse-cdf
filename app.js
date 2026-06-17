@@ -1389,34 +1389,77 @@ function buildStandalonePrintHtml(mode, contentHtml) {
   const isTicket = mode === "print-ticket";
   const css = isTicket ? `
     @page { size: A6 portrait; margin: 4mm; }
-    html, body { margin:0; padding:0; background:#fff; color:#000; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-    body { width:97mm; font-family: Arial, Helvetica, sans-serif; }
-    .ticket { box-sizing:border-box; width:97mm; padding:3mm; color:#000; font-size:10pt; font-weight:800; line-height:1.03; }
-    .ticket h1 { text-align:center; font-size:10pt; margin:0 0 1mm; line-height:1; font-weight:900; }
-    .ticket-order { text-align:center; font-size:9pt; font-weight:800; border-bottom:1px dashed currentColor; padding-bottom:.7mm; margin-bottom:1.4mm; line-height:1; }
-    .ticket-date { text-align:center; font-size:7pt; font-weight:800; margin-bottom:1mm; }
-    .ticket-section, .ticket-caisse { border-top:1px dashed currentColor; padding-top:.6mm; margin-top:.8mm; }
-    .ticket-line, .ticket-menu-line, .ticket-composite-line, .ticket-menu-item { break-inside:avoid; page-break-inside:avoid; margin-bottom:1mm; }
-    .ticket-line strong, .ticket-menu-line > strong { display:grid; grid-template-columns:minmax(0,1fr) auto auto; column-gap:2mm; align-items:center; font-size:10.5pt; line-height:1.04; font-weight:900; }
+    html, body {
+      margin:0;
+      padding:0;
+      background:#fff;
+      color:#000;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+      -webkit-text-size-adjust: 100%;
+      text-size-adjust: 100%;
+    }
+    body {
+      box-sizing:border-box;
+      width:97mm;
+      min-width:97mm;
+      max-width:97mm;
+      font-family: Arial, Helvetica, sans-serif;
+      overflow:visible;
+    }
+    .ticket {
+      box-sizing:border-box;
+      width:97mm;
+      min-width:97mm;
+      max-width:97mm;
+      padding:1.5mm 2mm;
+      color:#000;
+      font-size:15pt;
+      font-weight:900;
+      line-height:1.08;
+    }
+    .ticket h1 { text-align:center; font-size:15pt; margin:0 0 1mm; line-height:1; font-weight:900; }
+    .ticket-order { text-align:center; font-size:14pt; font-weight:900; border-bottom:1px dashed currentColor; padding-bottom:.8mm; margin-bottom:1.8mm; line-height:1; }
+    .ticket-date { text-align:center; font-size:10pt; font-weight:800; margin-bottom:1mm; }
+    .ticket-section, .ticket-caisse { border-top:1px dashed currentColor; padding-top:.8mm; margin-top:1mm; }
+    .ticket-line, .ticket-menu-line, .ticket-composite-line, .ticket-menu-item { break-inside:avoid; page-break-inside:avoid; margin-bottom:1.4mm; }
+    .ticket-line strong, .ticket-menu-line > strong {
+      display:grid;
+      grid-template-columns:minmax(0,1fr) auto auto;
+      column-gap:2mm;
+      align-items:center;
+      font-size:16pt;
+      line-height:1.08;
+      font-weight:900;
+    }
     .ticket-main { min-width:0; }
-    .ticket-line strong em, .ticket-menu-line > strong em { justify-self:end; font-size:8pt; font-style:normal; font-weight:800; white-space:nowrap; }
-    .ticket-line-detail, .ticket-menu-detail, .ticket-line span:not(.ticket-checks):not(.ticket-box):not(.ticket-main):not(.ticket-rest) { display:block; margin-left:6mm; margin-top:.2mm; margin-bottom:.6mm; font-size:7.8pt; line-height:1.05; font-weight:650; font-style:italic; }
-    .ticket-checks { display:inline-block; white-space:nowrap; font-family: Arial, Helvetica, sans-serif; font-size:10.5pt; line-height:1; letter-spacing:.4mm; min-width:5mm; text-align:right; }
-    .ticket-checks.empty { min-width:5mm; }
-    .ticket-box { display:inline !important; border:0 !important; width:auto !important; height:auto !important; font-size:10.5pt !important; line-height:1 !important; }
-    .ticket-menu-items { margin-left:6mm; margin-top:.3mm; }
-    .ticket-menu-item { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2mm; align-items:center; font-size:8.8pt; line-height:1.04; font-weight:800; }
-    .ticket-rest, .ticket-rest-inline { font-size:8pt; font-weight:900; white-space:nowrap; font-style:normal; }
-    .ticket-total, .ticket-pay, .ticket-change { display:flex; justify-content:space-between; gap:3mm; align-items:baseline; font-size:9pt; line-height:1.05; margin-top:.6mm; }
-    .ticket-total strong, .ticket-pay strong, .ticket-change strong { font-size:9.5pt; }
-    .ticket-change { border-top:1px solid currentColor; padding-top:.6mm; }
+    .ticket-line strong em, .ticket-menu-line > strong em { justify-self:end; font-size:14pt; font-style:normal; font-weight:900; white-space:nowrap; }
+    .ticket-line-detail, .ticket-menu-detail, .ticket-line span:not(.ticket-checks):not(.ticket-box):not(.ticket-main):not(.ticket-rest) {
+      display:block;
+      margin-left:7mm;
+      margin-top:.3mm;
+      margin-bottom:.8mm;
+      font-size:12pt;
+      line-height:1.08;
+      font-weight:800;
+      font-style:italic;
+    }
+    .ticket-checks { display:inline-block; white-space:nowrap; font-family: Arial, Helvetica, sans-serif; font-size:16pt; line-height:1; letter-spacing:.5mm; min-width:7mm; text-align:right; }
+    .ticket-checks.empty { min-width:7mm; }
+    .ticket-box { display:inline !important; border:0 !important; width:auto !important; height:auto !important; font-size:16pt !important; line-height:1 !important; }
+    .ticket-menu-items { margin-left:7mm; margin-top:.5mm; }
+    .ticket-menu-item { display:grid; grid-template-columns:minmax(0,1fr) auto; gap:2mm; align-items:center; font-size:14pt; line-height:1.08; font-weight:900; }
+    .ticket-rest, .ticket-rest-inline { font-size:13pt; font-weight:900; white-space:nowrap; font-style:normal; }
+    .ticket-total, .ticket-pay, .ticket-change { display:flex; justify-content:space-between; gap:3mm; align-items:baseline; font-size:15pt; line-height:1.05; margin-top:.8mm; font-weight:900; }
+    .ticket-total strong, .ticket-pay strong, .ticket-change strong { font-size:16pt; }
+    .ticket-change { border-top:1px solid currentColor; padding-top:.8mm; }
     hr { border:0; border-top:1px dashed currentColor; margin:1mm 0; }
   ` : `
     @page { size: A4 portrait; margin: 10mm; }
     html, body { margin:0; padding:0; background:#fff; color:#000; font-family: Arial, Helvetica, sans-serif; }
     body { font-size:11px; }
   `;
-  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Impression</title><style>${css}</style></head><body class="${mode}">${contentHtml}</body></html>`;
+  return `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=397, initial-scale=1"><title>Impression</title><style>${css}</style></head><body class="${mode}">${contentHtml}</body></html>`;
 }
 
 function printCurrentContent(mode) {
@@ -1428,10 +1471,10 @@ function printCurrentContent(mode) {
   const frame = document.createElement("iframe");
   frame.setAttribute("aria-hidden", "true");
   frame.style.position = "fixed";
-  frame.style.right = "0";
-  frame.style.bottom = "0";
-  frame.style.width = "0";
-  frame.style.height = "0";
+  frame.style.left = "-10000px";
+  frame.style.top = "0";
+  frame.style.width = mode === "print-ticket" ? "105mm" : "210mm";
+  frame.style.height = mode === "print-ticket" ? "148mm" : "297mm";
   frame.style.border = "0";
   document.body.appendChild(frame);
 

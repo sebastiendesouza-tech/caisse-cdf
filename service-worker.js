@@ -1,4 +1,4 @@
-const CACHE_NAME = 'caisse-manif-v26-07-ipad-print-iframe';
+const CACHE_NAME = 'caisse-manif-v26.09';
 const FILES = ["./", "index.html", "style.css", "app.js", "manifest.json", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", event => {
