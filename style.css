@@ -477,48 +477,195 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
   .settings-options-grid-3 { grid-template-columns: 1fr; }
 }
 
-/* v2026.02 - Correctif impression A6 iPad/AirPrint
-   Objectif : eviter la double marge AirPrint + CSS, surtout en mode PWA.
-   La page est declaree en A6 sans marge, puis la marge utile est geree
-   a l'interieur du ticket avec un padding. */
-@media print {
-  @page {
-    size: 105mm 148mm;
-    margin: 0;
-  }
+/* v2026.03 - déplacement des produits dans les paramètres */
+.move-buttons {
+  display: flex;
+  gap: 4px;
+  align-items: end;
+}
+.move-buttons button {
+  min-width: 38px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid #d1d5db;
+  background: #f9fafb;
+  font-weight: 900;
+}
+.clean-product-main {
+  grid-template-columns: auto minmax(190px, 1.5fr) 90px minmax(150px, 1fr) auto;
+  align-items: end;
+}
+@media (max-width: 900px) {
+  .clean-product-main { grid-template-columns: 1fr 1fr; }
+  .move-buttons { grid-column: 1 / -1; }
+}
 
-  html,
-  body {
-    width: 105mm;
-    height: 148mm;
-    margin: 0 !important;
-    padding: 0 !important;
-    background: white !important;
-    overflow: hidden !important;
+/* v2026.04 - paramètres produits plus ergonomiques */
+.product-zone-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: space-between;
+}
+.product-zone-title .add-zone-product {
+  margin-left: auto;
+  padding: 8px 12px;
+  font-size: 13px;
+  white-space: nowrap;
+}
+.clean-product-card {
+  padding: 10px 12px;
+}
+.clean-product-main {
+  display: grid;
+  grid-template-columns: 82px minmax(260px, 2.2fr) 88px minmax(145px, 1fr) auto auto;
+  gap: 8px;
+  align-items: end;
+}
+.clean-product-main input,
+.clean-product-main select {
+  min-height: 38px;
+}
+.clean-product-main .field-name input {
+  min-width: 240px;
+}
+.move-buttons {
+  justify-content: flex-start;
+  align-items: end;
+  gap: 4px;
+}
+.move-buttons button {
+  min-width: 36px;
+  width: 36px;
+  padding: 8px 0;
+}
+.small-action {
+  padding: 9px 10px;
+  white-space: nowrap;
+}
+.product-zone-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+@media (max-width: 1050px) {
+  .clean-product-main {
+    grid-template-columns: 76px minmax(210px, 1.7fr) 86px minmax(135px, 1fr);
   }
-
-  body > *:not(#printArea) {
-    display: none !important;
+  .clean-product-main .refundable-line,
+  .clean-product-main .small-action {
+    grid-column: auto;
   }
-
-  #printArea,
-  .print-ticket {
-    display: block !important;
-    width: 105mm !important;
-    min-height: 148mm !important;
-    margin: 0 !important;
-    padding: 4mm !important;
-    box-sizing: border-box !important;
-    color: var(--ticket-color, black) !important;
-    background: white !important;
-    font-size: 14px !important;
-    line-height: 1.05 !important;
+}
+@media (max-width: 760px) {
+  .clean-product-main {
+    grid-template-columns: 70px 1fr;
   }
+  .clean-product-main .field-name input { min-width: 0; }
+  .clean-product-main > * { min-width: 0; }
+}
 
-  .ticket {
-    width: 100% !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    box-sizing: border-box !important;
+
+/* v2026.05 - Paramètres Produits compacts et lisibles */
+.product-zone-editor {
+  padding: 10px 12px !important;
+  background: #f8fafc !important;
+}
+.product-zone-title {
+  min-height: 34px;
+  padding-bottom: 7px !important;
+}
+.product-zone-title strong {
+  font-size: 20px !important;
+}
+.product-zone-title .add-zone-product {
+  border-radius: 12px;
+  padding: 8px 13px !important;
+}
+.product-zone-list {
+  gap: 6px !important;
+}
+.clean-product-card {
+  padding: 7px 9px !important;
+  border-radius: 12px !important;
+  box-shadow: 0 1px 3px #00000010 !important;
+}
+.clean-product-main {
+  display: grid !important;
+  grid-template-columns: 78px minmax(320px, 2.4fr) 92px minmax(190px, 1.25fr) 130px 46px !important;
+  gap: 7px !important;
+  align-items: end !important;
+}
+.move-buttons {
+  display: flex !important;
+  gap: 4px !important;
+  align-items: end !important;
+  justify-content: flex-start !important;
+}
+.move-buttons button {
+  width: 36px !important;
+  min-width: 36px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+}
+.clean-product-main small {
+  font-size: 11px !important;
+  color: #6b7280 !important;
+}
+.clean-product-main input,
+.clean-product-main select {
+  min-height: 38px !important;
+  padding: 7px 8px !important;
+  font-size: 15px !important;
+}
+.clean-product-main .field-name input {
+  min-width: 0 !important;
+  width: 100% !important;
+  font-size: 16px !important;
+}
+.clean-product-main .field-price input {
+  width: 100% !important;
+}
+.refundable-line {
+  height: 38px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px !important;
+  font-size: 13px !important;
+  font-weight: 800 !important;
+  white-space: nowrap !important;
+  padding: 0 8px !important;
+}
+.refundable-line input {
+  width: auto !important;
+  min-height: 0 !important;
+  transform: scale(1.1);
+}
+.small-action {
+  width: 42px !important;
+  min-width: 42px !important;
+  height: 38px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  font-size: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+@media (max-width: 1180px) {
+  .clean-product-main {
+    grid-template-columns: 78px minmax(260px, 2fr) 86px minmax(165px, 1fr) 118px 44px !important;
+    gap: 6px !important;
+  }
+}
+@media (max-width: 900px) {
+  .clean-product-main {
+    grid-template-columns: 74px minmax(200px, 1.8fr) 84px minmax(140px, 1fr) !important;
+  }
+  .clean-product-main .refundable-line,
+  .clean-product-main .small-action {
+    grid-column: auto !important;
   }
 }

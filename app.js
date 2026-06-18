@@ -12,7 +12,7 @@ const PALETTE = {
 };
 
 const DEFAULT_CONFIG = {
-  configVersion: 18.17,
+  configVersion: 2026.05,
   eventName: 'Comité des Fêtes-Moroges',
   orderPrefix: 'A',
   ticketColor: 'black',
@@ -51,7 +51,7 @@ const DEFAULT_CONFIG = {
     { id: 'p-oasis', group: 'Boissons', category: 'Boissons sans alcool', name: 'Oasis', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-ice-tea', group: 'Boissons', category: 'Boissons sans alcool', name: 'Ice Tea', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-biere-25', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bière pression 25 cl', price: 2.50, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-pichet-biere', group: 'Boissons', category: 'Boissons avec alcool', name: 'Pichet bière', price: 9, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-pichet-biere', group: 'Boissons', category: 'Boissons avec alcool', name: 'Pichet bière', price: 10, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-verre-rose', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre rosé', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-verre-blanc', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre blanc', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-verre-rouge', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre rouge', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
@@ -59,17 +59,15 @@ const DEFAULT_CONFIG = {
     { id: 'p-bouteille-rose', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bouteille rosé', price: 11, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-bouteille-rouge', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bouteille rouge', price: 11, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-cremant', group: 'Boissons', category: 'Boissons avec alcool', name: 'Bouteille crémant', price: 13, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-verre-cremant', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre de crémant', price: 3, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-cafe', group: 'Boissons', category: 'Boissons chaudes', name: 'Café', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-boisson-libre', group: 'Boissons', category: 'Boissons sans alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
 
+    { id: 'p-frites', group: 'Restauration', category: 'Plat', name: 'Barquette de frites', price: 2.50, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-assiette-gourmande', group: 'Restauration', category: 'Plat', name: 'Assiette gourmande', price: 7, type: 'compose', components: [], choices: [
       { category: 'Viande', min: 2, max: 2, clientChoice: true, options: [{ foodId: 'food-saucisse', supplement: 0 }, { foodId: 'food-merguez', supplement: 0 }] },
       { category: 'Accompagnement', min: 1, max: 1, clientChoice: false, options: [{ foodId: 'food-frites', supplement: 0 }] }
     ], refundable: true, stock: '' },
-    { id: 'p-glace-vanille', group: 'Restauration', category: 'Dessert', name: 'Glace vanille', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-popcorn', group: 'Restauration', category: 'Dessert', name: 'Popcorn', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-glace-eau', group: 'Restauration', category: 'Dessert', name: "Glace à l'eau", price: 1, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-frites', group: 'Restauration', category: 'Plat', name: 'Barquette de frites', price: 2.50, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-menu', group: 'Restauration', category: 'Plat', name: 'Menu', price: 10, type: 'menu', components: [], refundable: true, stock: '', menuSections: [
       { section: 'Boissons', clientChoice: true, max: 1, options: [
         { productId: 'p-eau-50', supplement: -0.50 },
@@ -77,8 +75,11 @@ const DEFAULT_CONFIG = {
         { productId: 'p-verre-rose', supplement: 0.50 }, { productId: 'p-verre-blanc', supplement: 0.50 }, { productId: 'p-verre-rouge', supplement: 0.50 }
       ]},
       { section: 'Plat', clientChoice: false, max: 1, options: [{ productId: 'p-assiette-gourmande', supplement: 0 }] },
-      { section: 'Dessert', clientChoice: true, max: 1, options: [{ productId: 'p-glace-vanille', supplement: 0 }, { productId: 'p-glace-eau', supplement: 0 }] }
+      { section: 'Dessert', clientChoice: true, max: 1, options: [{ productId: 'p-glace-vanille', supplement: 0 }] }
     ] },
+    { id: 'p-glace-vanille', group: 'Restauration', category: 'Dessert', name: 'Glace vanille', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-popcorn', group: 'Restauration', category: 'Dessert', name: 'Popcorn', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
+    { id: 'p-glace-eau', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-restau-libre-1', group: 'Restauration', category: 'Plat', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-restau-libre-2', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
 
@@ -175,7 +176,7 @@ function normalizeConfig(c) {
   if (Array.isArray(c.products) && c.products[0] && !c.products[0].id) {
     c.products = c.products.map((p, i) => ({ id: 'p' + (i + 1), group: displayGroup(p.category), category: p.category || 'Plat', name: p.name || '', price: Number(p.price || 0), type: 'simple', components: [], refundable: true, stock: '' }));
   }
-  c.configVersion = 18.17;
+  c.configVersion = 2026.05;
   c.eventName = base.eventName;
   c.orderPrefix ||= 'A';
   c.ticketColor ||= 'black';
@@ -189,10 +190,31 @@ function normalizeConfig(c) {
   c.products ||= base.products;
   c.products.forEach((p, i) => { p.id ||= 'p' + (i + 1); p.group ||= displayGroup(p.category); p.type ||= 'simple'; p.components ||= []; p.choices ||= []; p.menuSections ||= []; p.refundable = p.refundable !== false; p.stock ??= ''; });
   // v18.14 : correction forcée des prix et des boissons du menu même si une ancienne configuration est déjà enregistrée sur l'iPad.
-  const forcedPriceUpdates = { 'p-assiette-gourmande': 7, 'p-consigne': 2, 'p-retour-consigne': -2 };
+  const forcedPriceUpdates = { 'p-assiette-gourmande': 7, 'p-pichet-biere': 10, 'p-consigne': 2, 'p-retour-consigne': -2 };
   c.products.forEach(p => {
     if (Object.prototype.hasOwnProperty.call(forcedPriceUpdates, p.id)) p.price = forcedPriceUpdates[p.id];
   });
+  if (!c.products.some(p => p.id === 'p-verre-cremant')) {
+    const cafeIndex = c.products.findIndex(p => p.id === 'p-cafe');
+    const item = { id: 'p-verre-cremant', group: 'Boissons', category: 'Boissons avec alcool', name: 'Verre de crémant', price: 3, type: 'simple', components: [], refundable: true, stock: '' };
+    c.products.splice(cafeIndex >= 0 ? cafeIndex : c.products.length, 0, item);
+  }
+  // v2026.04 : configuration distribuable, tout le suivi stock est désactivé par défaut.
+  if (previousVersion < 2026.05) {
+    (c.products || []).forEach(p => { p.stock = ''; });
+    (c.baseFoods || []).forEach(f => { f.stock = ''; });
+  }
+  // v2026.03 : Glace à l'eau supprimée mais le bouton reste disponible en emplacement libre.
+  const glaceEau = c.products.find(p => p.id === 'p-glace-eau');
+  if (glaceEau) { glaceEau.name = ''; glaceEau.price = 0; glaceEau.stock = ''; glaceEau.type = 'simple'; glaceEau.components = []; glaceEau.choices = []; glaceEau.menuSections = []; }
+
+  const productOrder = ['p-eau-50','p-eau-150','p-coca','p-oasis','p-ice-tea','p-biere-25','p-pichet-biere','p-verre-rose','p-verre-blanc','p-verre-rouge','p-bouteille-blanc','p-bouteille-rose','p-bouteille-rouge','p-cremant','p-verre-cremant','p-boisson-libre','p-cafe','p-frites','p-assiette-gourmande','p-menu','p-glace-vanille','p-popcorn','p-glace-eau','p-restau-libre-1','p-restau-libre-2','p-consigne','p-retour-consigne'];
+  if (previousVersion < 2026.03) {
+    c.products.sort((a,b) => {
+      const ia = productOrder.indexOf(a.id), ib = productOrder.indexOf(b.id);
+      return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+    });
+  }
 
   // v18.14 : le menu ne propose que les boissons autorisées.
   const menu = c.products.find(p => p.id === 'p-menu');
@@ -212,6 +234,8 @@ function normalizeConfig(c) {
       { productId: 'p-verre-blanc', supplement: 0.50 },
       { productId: 'p-verre-rouge', supplement: 0.50 }
     ];
+    let dessert = menu.menuSections.find(sec => sec.section === 'Dessert');
+    if (dessert) dessert.options = (dessert.options || []).filter(o => o.productId !== 'p-glace-eau');
   }
   c.baseFoods.forEach(f => { f.id ||= uid('food'); f.category ||= 'Viande'; f.stock ??= ''; });
   c.volunteers.forEach(v => { v.id ||= uid('vol'); v.name ||= 'Bénévole'; v.active = v.active !== false; });
@@ -345,6 +369,7 @@ function pressKey(key) { if (key === 'clear') paidCents = 0; else if (key === 'b
 function setQuickAmount(amount) { paidCents = Math.round(amount * 100); updatePayment(); }
 function payAndPrint(method) {
   if (!cart.length) return showMessage('Commande vide', 'Ajoute au moins un produit avant de valider.');
+  if (method === 'CB' && total() < 0) return showMessage('Rendu impossible en CB', 'Un remboursement ou un retour consigne se fait uniquement en espèces.');
   paymentMethod = method;
   if (total() <= 0) paidCents = 0;
   else if (method === 'CB') paidCents = Math.round(total() * 100);
@@ -597,11 +622,12 @@ function renderProductEditor() {
     const detail = p.type === 'compose' ? renderChoiceEditor(p, i) : (p.type === 'menu' ? renderMenuEditor(p, i) : '');
     return `<article class="product-edit-card clean-product-card">
       <div class="editor-row product-main clean-product-main">
+        <div class="move-buttons"><button type="button" class="move-product" data-move-product="up" data-i="${i}">↑</button><button type="button" class="move-product" data-move-product="down" data-i="${i}">↓</button></div>
         <div class="field-name"><small>Nom</small><input data-product="name" data-i="${i}" value="${escapeHtml(p.name)}"></div>
         <div class="field-price"><small>Prix</small><input type="number" step="0.01" data-product="price" data-i="${i}" value="${p.price}"></div>
-        <div><small>Type</small><select data-product="type" data-i="${i}"><option value="simple" ${p.type === 'simple' ? 'selected' : ''}>simple</option><option value="compose" ${p.type === 'compose' ? 'selected' : ''}>composé</option><option value="menu" ${p.type === 'menu' ? 'selected' : ''}>menu</option></select></div>
         <div><small>Catégorie</small><select data-product="category" data-i="${i}">${options(CATEGORIES, p.category)}</select></div>
         <label class="checkline refundable-line"><input type="checkbox" data-product="refundable" data-i="${i}" ${p.refundable ? 'checked' : ''}> Remboursable</label>
+        <button type="button" class="danger small-action" data-delete-product="${i}" title="Supprimer">🗑</button>
       </div>${detail}
     </article>`;
   }
@@ -609,13 +635,60 @@ function renderProductEditor() {
   el.innerHTML = zones.map(zone => {
     const rows = byZone[zone] || [];
     return `<section class="product-zone-editor ${groupClass(zone)}-editor">
-      <div class="product-zone-title"><strong>${zone}</strong><span>${rows.length} bouton${rows.length > 1 ? 's' : ''}</span></div>
+      <div class="product-zone-title"><strong>${zone}</strong><span>${rows.length} bouton${rows.length > 1 ? 's' : ''}</span><button type="button" class="secondary add-zone-product" data-add-product-zone="${zone}">Ajouter un bouton</button></div>
       <div class="product-zone-list">${rows.map(({ p, i }) => productCard(p, i)).join('')}</div>
     </section>`;
   }).join('');
   el.querySelectorAll('[data-product]').forEach(x => x.addEventListener('change', updateProductDraft));
   el.querySelectorAll('[data-choice-field]').forEach(x => x.addEventListener('change', updateChoiceDraft));
   el.querySelectorAll('[data-menu-field]').forEach(x => x.addEventListener('change', updateMenuDraft));
+  el.querySelectorAll('[data-move-product]').forEach(x => x.addEventListener('click', moveProductDraft));
+  el.querySelectorAll('[data-add-product-zone]').forEach(x => x.addEventListener('click', addProductDraft));
+  el.querySelectorAll('[data-delete-product]').forEach(x => x.addEventListener('click', deleteProductDraft));
+}
+function newProductForZone(zone) {
+  const category = zone === 'Boissons' ? 'Boissons sans alcool' : (zone === 'Consignes' ? 'Consigne' : 'Plat');
+  return { id: uid('p'), group: zone, category, name: 'Libre', price: 0, type: 'simple', components: [], choices: [], menuSections: [], refundable: true, stock: '' };
+}
+function addProductDraft(e) {
+  const zone = e.currentTarget.dataset.addProductZone;
+  draftConfig.products ||= [];
+  draftConfig.products.push(newProductForZone(zone));
+  renderProductEditor();
+  renderStockEditor();
+  renderGeneralEditor();
+}
+function deleteProductDraft(e) {
+  const i = Number(e.currentTarget.dataset.deleteProduct);
+  const p = draftConfig.products?.[i];
+  if (!p) return;
+  const remove = () => {
+    const removedId = p.id;
+    draftConfig.products.splice(i, 1);
+    draftConfig.products.forEach(prod => {
+      prod.components = (prod.components || []).filter(id => id !== removedId);
+      prod.menuSections = (prod.menuSections || []).map(sec => ({ ...sec, options: (sec.options || []).filter(o => o.productId !== removedId) }));
+    });
+    renderSettings();
+  };
+  if (typeof showConfirm === 'function') showConfirm('Supprimer le bouton', `Supprimer ${p.name || 'ce bouton'} ?`, remove);
+  else if (confirm(`Supprimer ${p.name || 'ce bouton'} ?`)) remove();
+}
+function moveProductDraft(e) {
+  const i = Number(e.currentTarget.dataset.i);
+  const dir = e.currentTarget.dataset.moveProduct === 'up' ? -1 : 1;
+  const products = draftConfig.products || [];
+  const product = products[i];
+  if (!product) return;
+  const zone = product.group || displayGroup(product.category);
+  const zoneIndices = products.map((p, idx) => ({ p, idx })).filter(x => (x.p.group || displayGroup(x.p.category)) === zone).map(x => x.idx);
+  const pos = zoneIndices.indexOf(i);
+  const targetIndex = zoneIndices[pos + dir];
+  if (targetIndex === undefined) return;
+  const tmp = products[i];
+  products[i] = products[targetIndex];
+  products[targetIndex] = tmp;
+  renderProductEditor();
 }
 function renderChoiceEditor(p, i) {
   const groups = ['Viande', 'Accompagnement'];
@@ -759,7 +832,7 @@ function validateVolunteerOrder(id) {
   paymentMethod = 'Bénévole';
   paidCents = 0;
   document.getElementById('volunteerDialog').close();
-  validateSale({ kind: 'volunteer', paymentMethod: 'Bénévole - à régler', paid: 0, change: 0, volunteerId: v.id, volunteerName: v.name, settled: false });
+  validateSale({ kind: 'volunteer', paymentMethod: 'Bénévole - à régler', paid: 0, change: 0, volunteerId: v.id, volunteerName: v.name, settled: false, print: true });
 }
 let volunteerPayOrderNumber = null;
 function volunteerPendingAmount(volunteerId) {
@@ -858,6 +931,16 @@ function reportHtml() {
 }
 function bindVolunteerPayButtons(root = document) {
   root.querySelectorAll('[data-pay-volunteer]').forEach(b => b.addEventListener('click', e => openVolunteerPayment(e.currentTarget.dataset.payVolunteer)));
+  root.querySelectorAll('[data-toggle-volunteer-order]').forEach(b => b.addEventListener('click', e => toggleVolunteerOrder(Number(e.currentTarget.dataset.toggleVolunteerOrder))));
+}
+function toggleVolunteerOrder(index) {
+  const s = sales[index];
+  if (!s || s.kind !== 'volunteer') return;
+  s.settled = s.settled === false;
+  s.paymentMethod = s.settled === false ? 'Bénévole - à régler' : 'Bénévole réglé';
+  saveSales();
+  renderSettingsOrders();
+  renderSettingsReport();
 }
 function renderSettingsReport() {
   const el = document.getElementById('settingsReportContent');
@@ -875,8 +958,9 @@ function ordersHtml() {
     const isRefund = s.kind === 'refund';
     const isVolunteer = s.kind === 'volunteer';
     const items = (s.items || []).map(i => `${i.qty} x ${escapeHtml(i.name)} (${fmt(i.qty * i.price)})`).join('<br>');
+    const volunteerToggle = isVolunteer ? `<button class="secondary" data-toggle-volunteer-order="${idx}">${s.settled === false ? 'Marquer réglé' : 'Marquer à régler'}</button>` : '';
     const refundInfo = isVolunteer ? `<div class="hint">Bénévole : ${escapeHtml(s.volunteerName || '')} - ${s.settled === false ? 'à régler' : 'réglé'}</div>` : (!isRefund ? `<div class="hint">Déjà remboursé : ${fmt(refundAmountForSale(s.orderNumber))} / Net : ${fmt(netSaleTotal(s))}</div>` : `<div class="hint">Remboursement en espèces</div>`);
-    const btn = (!isRefund && !isVolunteer && netSaleTotal(s) > 0) ? `<button class="danger" data-refund-sale="${idx}">Rembourser</button>` : '';
+    const btn = (!isRefund && !isVolunteer && netSaleTotal(s) > 0) ? `<button class="danger" data-refund-sale="${idx}">Rembourser</button>` : volunteerToggle;
     return `<div class="order-card ${isRefund ? 'refund-card' : ''}"><div><strong>${isRefund ? 'Remboursement' : 'Commande'} n° ${escapeHtml(s.orderNumber)}</strong><span>${formatDate(s.date)}</span></div><div>${items}</div><div class="order-bottom"><b>${fmt(s.total)}</b><span>${escapeHtml(s.paymentMethod || '')}</span>${btn}</div>${refundInfo}</div>`;
   }).reverse().join('') || '<p>Aucune commande enregistrée.</p>';
 }
@@ -888,10 +972,12 @@ function renderSettingsOrders() {
   if (!el) return;
   el.innerHTML = ordersHtml();
   bindRefundButtons(el);
+  bindVolunteerPayButtons(el);
 }
 function openOrders() {
   document.getElementById('ordersList').innerHTML = ordersHtml();
   bindRefundButtons(document.getElementById('ordersList'));
+  bindVolunteerPayButtons(document.getElementById('ordersList'));
   document.getElementById('ordersDialog').showModal();
 }
 function openRefund(index) {

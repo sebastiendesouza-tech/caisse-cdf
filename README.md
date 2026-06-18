@@ -124,3 +124,28 @@ Version simple HTML/CSS/JavaScript pour GitHub Pages et iPad.
 ## v2026.01
 - Paramètres > Produits : choix multiples affichés en 2 ou 3 colonnes.
 - Suppression de l'indication simple/composé dans les listes de choix.
+
+
+## v2026.03
+- Ajout du verre de crémant à 3 €.
+- Pichet bière à 10 €.
+- Café placé en dernier dans les boissons.
+- Ordre restauration : frites, assiette gourmande, menu, puis desserts.
+- Stocks initiaux forcés : saucisses 25, merguez 25, glaces vanille 40.
+- Commandes bénévoles imprimées et statut réglé/à régler modifiable dans Paramètres > Commandes.
+- Rendu d'argent en CB bloqué : espèces uniquement pour retours/remboursements.
+
+
+## v2026.05
+- Stocks produits et aliments en non suivi par défaut.
+- Paramètres produits plus compacts.
+- Ajout/suppression de boutons par zone.
+- Déplacement des boutons conservé avec ▲/▼.
+
+
+## v2026.05
+- Paramètres Produits réorganisés en lignes compactes.
+- Catégorie et option Remboursable conservées.
+- Flèches rapprochées du produit, champ nom élargi.
+- Bouton supprimer réduit.
+- Produits et aliments en stock non suivi par défaut.
