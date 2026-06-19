@@ -112,7 +112,7 @@ Version simple HTML/CSS/JavaScript pour GitHub Pages et iPad.
 
 
 ## v18.16
-- Nom de manifestation affiché sur une seule ligne dans le bandeau : Comité des Fêtes.
+- Nom de manifestation affiché sur une seule ligne dans le bandeau : Comité des Fêtes-Moroges.
 - Liste des bénévoles préchargée et triée alphabétiquement.
 - Sélection des bénévoles en boutons sur 2 colonnes.
 
@@ -136,16 +136,49 @@ Version simple HTML/CSS/JavaScript pour GitHub Pages et iPad.
 - Rendu d'argent en CB bloqué : espèces uniquement pour retours/remboursements.
 
 
-## v2026.05
+## v2026.12
 - Stocks produits et aliments en non suivi par défaut.
 - Paramètres produits plus compacts.
 - Ajout/suppression de boutons par zone.
 - Déplacement des boutons conservé avec ▲/▼.
 
 
-## v2026.05
+## v2026.12
 - Paramètres Produits réorganisés en lignes compactes.
 - Catégorie et option Remboursable conservées.
 - Flèches rapprochées du produit, champ nom élargi.
 - Bouton supprimer réduit.
 - Produits et aliments en stock non suivi par défaut.
+
+
+## v2026.12
+- Boutons de remise a zero renommes selon leur action.
+- Effacer les commandes fonctionne avec confirmation.
+- Reinitialiser le bilan fonctionne avec confirmation.
+- Reinitialiser toute l application fonctionne depuis General.
+- Boutons d action fixes en bas de la fenetre Parametres.
+
+
+## v2026.12
+
+- Correction des réinitialisations : commandes et bilan sont maintenant séparés.
+- Effacer les commandes conserve le bilan.
+- Réinitialiser le bilan conserve les commandes.
+
+
+## v2026.12
+- Correction ergonomique : les boutons fixes en bas des parametres ne masquent plus les dernieres lignes des listes.
+
+
+## v2026.12
+- Correction paramètres : chaque onglet a son propre ascenseur interne.
+- Les boutons du bas restent visibles sans masquer la liste.
+
+
+## v2026.12
+- Réinitialisation spécifique par onglet dans Paramètres.
+- Produits : vide uniquement les boutons produits.
+- Aliments : efface uniquement les aliments.
+- Stocks : met tous les stocks en non suivi.
+- Bénévoles : efface uniquement la liste des bénévoles.
+- Général conserve la réinitialisation complète de l’application.

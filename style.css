@@ -592,7 +592,7 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
 }
 .clean-product-main {
   display: grid !important;
-  grid-template-columns: 78px minmax(320px, 2.4fr) 92px minmax(190px, 1.25fr) 130px 46px !important;
+  grid-template-columns: 78px minmax(280px, 2.2fr) 92px 120px minmax(180px, 1.15fr) 130px 46px !important;
   gap: 7px !important;
   align-items: end !important;
 }
@@ -656,16 +656,92 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
 }
 @media (max-width: 1180px) {
   .clean-product-main {
-    grid-template-columns: 78px minmax(260px, 2fr) 86px minmax(165px, 1fr) 118px 44px !important;
+    grid-template-columns: 74px minmax(230px, 2fr) 84px 110px minmax(150px, 1fr) 118px 44px !important;
     gap: 6px !important;
   }
 }
 @media (max-width: 900px) {
   .clean-product-main {
-    grid-template-columns: 74px minmax(200px, 1.8fr) 84px minmax(140px, 1fr) !important;
+    grid-template-columns: 74px minmax(200px, 1.8fr) 84px 105px minmax(140px, 1fr) !important;
   }
   .clean-product-main .refundable-line,
   .clean-product-main .small-action {
     grid-column: auto !important;
   }
+}
+
+/* v2026.12 - actions de paramètres visibles */
+.settings {
+  display: flex;
+  flex-direction: column;
+}
+.tab-panel.active {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+.settings-actions {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: #fff;
+  border-top: 1px solid #e5e7eb;
+  padding: 10px 0 2px;
+  align-items: center;
+}
+.settings-actions .danger {
+  white-space: nowrap;
+}
+
+
+/* v2026.12 - evite que les boutons fixes des parametres masquent les listes */
+.tab-panel.active {
+  padding-bottom: 86px;
+}
+.settings-actions {
+  box-shadow: 0 -8px 14px rgba(255,255,255,.92);
+}
+@media (max-height: 760px) {
+  .tab-panel.active { padding-bottom: 98px; }
+}
+
+
+/* v2026.12 - sous-ascenseur interne dans les paramètres
+   Le contenu de l'onglet défile seul. Les boutons du bas restent hors de la liste. */
+#settingsDialog {
+  height: min(92dvh, 92vh);
+  max-height: min(92dvh, 92vh);
+  overflow: hidden;
+}
+#settingsDialog .settings {
+  height: min(92dvh, 92vh);
+  max-height: min(92dvh, 92vh);
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+#settingsDialog .settings-head,
+#settingsDialog .settings-tabs,
+#settingsDialog .settings-actions {
+  flex: 0 0 auto;
+}
+#settingsDialog .tab-panel {
+  display: none;
+}
+#settingsDialog .tab-panel.active {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-bottom: 18px !important;
+  -webkit-overflow-scrolling: touch;
+}
+#settingsDialog .settings-actions {
+  position: static !important;
+  margin-top: 8px;
+  padding: 8px 0 0;
+  background: #fff;
+  box-shadow: none !important;
+  border-top: 1px solid #e5e7eb;
 }

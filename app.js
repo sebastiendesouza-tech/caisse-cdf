@@ -12,7 +12,7 @@ const PALETTE = {
 };
 
 const DEFAULT_CONFIG = {
-  configVersion: 2026.05,
+  configVersion: 2026.11,
   eventName: 'Comité des Fêtes-Moroges',
   orderPrefix: 'A',
   ticketColor: 'black',
@@ -98,6 +98,8 @@ let paymentMethod = 'Espèces';
 let paidCents = 0;
 let orderNumber = Number(localStorage.getItem('caisse_order_number') || '1');
 let sales = JSON.parse(localStorage.getItem('caisse_sales') || '[]');
+let reportArchive = JSON.parse(localStorage.getItem('caisse_report_archive') || 'null');
+let reportResetAt = localStorage.getItem('caisse_report_reset_at') || '';
 let lastTicketHtml = localStorage.getItem('caisse_last_ticket_html') || '';
 let pendingChoiceProduct = null;
 
@@ -107,6 +109,12 @@ const paidAmount = () => paidCents / 100;
 function uid(prefix) { return prefix + '-' + Math.random().toString(36).slice(2, 8); }
 function saveConfig() { localStorage.setItem('caisse_config', JSON.stringify(config)); }
 function saveSales() { localStorage.setItem('caisse_sales', JSON.stringify(sales)); }
+function saveReportState() {
+  if (reportArchive) localStorage.setItem('caisse_report_archive', JSON.stringify(reportArchive));
+  else localStorage.removeItem('caisse_report_archive');
+  if (reportResetAt) localStorage.setItem('caisse_report_reset_at', reportResetAt);
+  else localStorage.removeItem('caisse_report_reset_at');
+}
 function saveOrderNumber() { localStorage.setItem('caisse_order_number', String(orderNumber)); }
 function saveLastTicket() { localStorage.setItem('caisse_last_ticket_html', lastTicketHtml || ''); }
 function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
@@ -176,7 +184,7 @@ function normalizeConfig(c) {
   if (Array.isArray(c.products) && c.products[0] && !c.products[0].id) {
     c.products = c.products.map((p, i) => ({ id: 'p' + (i + 1), group: displayGroup(p.category), category: p.category || 'Plat', name: p.name || '', price: Number(p.price || 0), type: 'simple', components: [], refundable: true, stock: '' }));
   }
-  c.configVersion = 2026.05;
+  c.configVersion = 2026.11;
   c.eventName = base.eventName;
   c.orderPrefix ||= 'A';
   c.ticketColor ||= 'black';
@@ -607,7 +615,7 @@ function addMenuProduct() {
   pendingChoiceProduct = null;
 }
 
-function openSettings() { draftConfig = clone(config); renderSettings(); document.getElementById('settingsDialog').showModal(); }
+function openSettings() { draftConfig = clone(config); renderSettings(); updateSettingsResetButton(); document.getElementById('settingsDialog').showModal(); }
 function renderSettings() { renderProductEditor(); renderFoodEditor(); renderStockEditor(); renderGeneralEditor(); renderVolunteerEditor(); renderSettingsOrders(); renderSettingsReport(); }
 function renderProductEditor() {
   const el = document.getElementById('productEditor');
@@ -625,6 +633,7 @@ function renderProductEditor() {
         <div class="move-buttons"><button type="button" class="move-product" data-move-product="up" data-i="${i}">↑</button><button type="button" class="move-product" data-move-product="down" data-i="${i}">↓</button></div>
         <div class="field-name"><small>Nom</small><input data-product="name" data-i="${i}" value="${escapeHtml(p.name)}"></div>
         <div class="field-price"><small>Prix</small><input type="number" step="0.01" data-product="price" data-i="${i}" value="${p.price}"></div>
+        <div class="field-type"><small>Structure</small><select data-product="type" data-i="${i}"><option value="simple" ${p.type === 'simple' ? 'selected' : ''}>Simple</option><option value="compose" ${p.type === 'compose' ? 'selected' : ''}>Composé</option><option value="menu" ${p.type === 'menu' ? 'selected' : ''}>Menu</option></select></div>
         <div><small>Catégorie</small><select data-product="category" data-i="${i}">${options(CATEGORIES, p.category)}</select></div>
         <label class="checkline refundable-line"><input type="checkbox" data-product="refundable" data-i="${i}" ${p.refundable ? 'checked' : ''}> Remboursable</label>
         <button type="button" class="danger small-action" data-delete-product="${i}" title="Supprimer">🗑</button>
@@ -801,7 +810,14 @@ function saveSettings() {
   }
   draftConfig.orderPrefix = document.getElementById('setPrefix').value;
   draftConfig.ticketColor = document.getElementById('setTicketColor').value;
-  config = normalizeConfig(draftConfig); saveConfig(); renderProducts(); renderCart(); document.getElementById('settingsDialog').close();
+  config = normalizeConfig(draftConfig);
+  draftConfig = clone(config);
+  saveConfig();
+  renderProducts();
+  renderCart();
+  renderSettings();
+  updateSettingsResetButton();
+  showMessage('Paramètres enregistrés', 'Les modifications ont été enregistrées. La fenêtre reste ouverte.');
 }
 
 
@@ -903,31 +919,66 @@ function saleTotal(s) { return Number(s.total || 0); }
 function refundAmountForSale(orderNumber) { return sales.filter(x => x.kind === 'refund' && x.originalOrderNumber === orderNumber).reduce((sum, r) => sum + Math.abs(Number(r.total || 0)), 0); }
 function netSaleTotal(s) { return saleTotal(s) - refundAmountForSale(s.orderNumber); }
 function formatDate(iso) { try { return new Date(iso).toLocaleString('fr-FR'); } catch { return iso || ''; } }
-function paymentTotals() {
-  return sales.reduce((acc, s) => {
-    const kind = s.kind || 'sale';
-    if (kind === 'volunteer') return acc;
-    const method = s.paymentMethod || 'Inconnu';
-    acc[method] ||= 0;
-    acc[method] += Number(s.total || 0);
-    return acc;
-  }, {});
+function salesForReport() {
+  if (!reportResetAt) return sales;
+  const limit = new Date(reportResetAt).getTime();
+  return sales.filter(s => {
+    const t = new Date(s.date || 0).getTime();
+    return Number.isFinite(t) && t >= limit;
+  });
 }
-function reportHtml() {
-  const totals = paymentTotals();
-  const gross = sales.filter(s => (s.kind || 'sale') === 'sale').reduce((a,s)=>a+Number(s.total||0),0);
-  const refunds = sales.filter(s => s.kind === 'refund').reduce((a,s)=>a+Math.abs(Number(s.total||0)),0);
-  const volunteerPending = sales.filter(s => s.kind === 'volunteer' && s.settled === false).reduce((a,s)=>a+Number(s.total||0),0);
-  const net = gross - refunds;
+function computeReportData(list = salesForReport()) {
+  const totals = {};
+  list.forEach(s => {
+    const kind = s.kind || 'sale';
+    if (kind === 'volunteer') return;
+    const method = s.paymentMethod || 'Inconnu';
+    totals[method] ||= 0;
+    totals[method] += Number(s.total || 0);
+  });
+  const gross = list.filter(s => (s.kind || 'sale') === 'sale').reduce((a,s)=>a+Number(s.total||0),0);
+  const refunds = list.filter(s => s.kind === 'refund').reduce((a,s)=>a+Math.abs(Number(s.total||0)),0);
+  const volunteerPending = list.filter(s => s.kind === 'volunteer' && s.settled === false).reduce((a,s)=>a+Number(s.total||0),0);
   const productMap = {};
-  sales.forEach(s => (s.items || []).forEach(i => {
+  list.forEach(s => (s.items || []).forEach(i => {
     productMap[i.name] ||= { qty: 0, total: 0 };
     productMap[i.name].qty += Number(i.qty || 0);
     productMap[i.name].total += Number(i.qty || 0) * Number(i.price || 0);
   }));
-  const productRows = Object.entries(productMap).sort((a,b)=>Math.abs(b[1].total)-Math.abs(a[1].total)).map(([name,v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`).join('');
+  return { totals, gross, refunds, volunteerPending, productMap, orderCount: list.filter(s => (s.kind || 'sale') === 'sale').length };
+}
+function mergeReportData(a, b) {
+  const out = { totals: {}, gross: 0, refunds: 0, volunteerPending: 0, productMap: {}, orderCount: 0 };
+  [a, b].filter(Boolean).forEach(src => {
+    out.gross += Number(src.gross || 0);
+    out.refunds += Number(src.refunds || 0);
+    out.volunteerPending += Number(src.volunteerPending || 0);
+    out.orderCount += Number(src.orderCount || 0);
+    Object.entries(src.totals || {}).forEach(([k,v]) => { out.totals[k] ||= 0; out.totals[k] += Number(v || 0); });
+    Object.entries(src.productMap || {}).forEach(([name,v]) => {
+      out.productMap[name] ||= { qty: 0, total: 0 };
+      out.productMap[name].qty += Number(v.qty || 0);
+      out.productMap[name].total += Number(v.total || 0);
+    });
+  });
+  return out;
+}
+function visibleReportData() {
+  return mergeReportData(reportArchive, computeReportData());
+}
+function paymentTotals() {
+  return visibleReportData().totals;
+}
+function reportHtml() {
+  const data = visibleReportData();
+  const totals = data.totals || {};
+  const gross = Number(data.gross || 0);
+  const refunds = Number(data.refunds || 0);
+  const volunteerPending = Number(data.volunteerPending || 0);
+  const net = gross - refunds;
+  const productRows = Object.entries(data.productMap || {}).sort((a,b)=>Math.abs(b[1].total)-Math.abs(a[1].total)).map(([name,v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`).join('');
   const volunteerRows = (config.volunteers || []).map(v => ({ v, amount: volunteerPendingAmount(v.id) })).filter(x => x.amount > 0).map(x => `<tr><td>${escapeHtml(x.v.name)}</td><td>${fmt(x.amount)}</td><td><button class="validate" data-pay-volunteer="${escapeHtml(x.v.id)}">Régler</button></td></tr>`).join('');
-  return `<div class="report-cards"><div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${sales.filter(s => (s.kind || 'sale') === 'sale').length}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Par produit</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucune vente</td></tr>'}</tbody></table><h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`;
+  return `<div class="report-cards"><div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${data.orderCount || 0}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Par produit</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucune vente</td></tr>'}</tbody></table><h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`;
 }
 function bindVolunteerPayButtons(root = document) {
   root.querySelectorAll('[data-pay-volunteer]').forEach(b => b.addEventListener('click', e => openVolunteerPayment(e.currentTarget.dataset.payVolunteer)));
@@ -1062,13 +1113,150 @@ document.addEventListener('click', e => {
   if (totalEl) totalEl.textContent = String(newTotal);
 });
 
+
+function activeSettingsTab() {
+  return document.querySelector('.settings-tabs .tab.active')?.dataset.tab || 'products';
+}
+function updateSettingsResetButton() {
+  const btn = document.getElementById('btnReset');
+  if (!btn) return;
+  const tab = activeSettingsTab();
+  const labels = {
+    products: 'Vider les boutons produits',
+    foods: 'Effacer les aliments',
+    stocks: 'Réinitialiser les stocks',
+    volunteers: 'Effacer les bénévoles',
+    orders: 'Effacer les commandes',
+    report: 'Réinitialiser le bilan',
+    general: "Réinitialiser toute l'application"
+  };
+  if (tab === 'export') { btn.style.display = 'none'; return; }
+  btn.textContent = labels[tab] || 'Réinitialiser';
+  btn.style.display = '';
+}
+
+function blankProductForSameSlot(p) {
+  const group = p.group || displayGroup(p.category);
+  const category = p.category || (group === 'Boissons' ? 'Boissons sans alcool' : (group === 'Consignes' ? 'Consigne' : 'Plat'));
+  return {
+    id: p.id || uid('p'),
+    group,
+    category,
+    name: '',
+    price: 0,
+    type: 'simple',
+    components: [],
+    choices: [],
+    menuSections: [],
+    refundable: true,
+    stock: ''
+  };
+}
+function resetDraftProducts() {
+  draftConfig.products = (draftConfig.products || []).map(blankProductForSameSlot);
+  renderSettings();
+  updateSettingsResetButton();
+  showMessage('Boutons produits vidés', 'Les boutons produits sont maintenant vierges. Clique sur Enregistrer pour appliquer.');
+}
+function resetDraftFoods() {
+  draftConfig.baseFoods = [];
+  (draftConfig.products || []).forEach(p => {
+    p.components = [];
+    p.choices = [];
+    p.menuSections = (p.menuSections || []).map(sec => ({ ...sec, options: (sec.options || []).map(opt => ({ productId: opt.productId, supplement: opt.supplement || 0 })) }));
+  });
+  renderSettings();
+  updateSettingsResetButton();
+  showMessage('Aliments effacés', 'La liste des aliments est vide. Clique sur Enregistrer pour appliquer.');
+}
+function resetDraftStocks() {
+  (draftConfig.products || []).forEach(p => { p.stock = ''; });
+  (draftConfig.baseFoods || []).forEach(f => { f.stock = ''; });
+  renderStockEditor();
+  showMessage('Stocks réinitialisés', 'Tous les stocks sont en non suivi. Clique sur Enregistrer pour appliquer.');
+}
+function resetDraftVolunteers() {
+  draftConfig.volunteers = [];
+  renderVolunteerEditor();
+  showMessage('Bénévoles effacés', 'La liste des bénévoles est vide. Clique sur Enregistrer pour appliquer.');
+}
+function clearAllOrdersAndTickets() {
+  // On conserve le bilan visible avant suppression, puis on efface seulement l'historique des commandes.
+  reportArchive = visibleReportData();
+  sales = [];
+  lastTicketHtml = '';
+  orderNumber = 1;
+  saveReportState();
+  saveSales();
+  saveLastTicket();
+  saveOrderNumber();
+  renderSettingsOrders();
+  renderSettingsReport();
+  renderCart();
+  showMessage('Commandes effacées', 'Les commandes ont été supprimées. Le bilan est conservé.');
+}
+function resetReportData() {
+  // Le bilan repart à zéro sans supprimer la liste des commandes.
+  reportArchive = null;
+  reportResetAt = new Date().toISOString();
+  saveReportState();
+  renderSettingsReport();
+  renderSettingsOrders();
+  showMessage('Bilan réinitialisé', 'Le bilan est revenu à zéro. Les commandes sont conservées.');
+}
+function resetWholeApplication() {
+  config = clone(DEFAULT_CONFIG);
+  draftConfig = clone(DEFAULT_CONFIG);
+  sales = [];
+  reportArchive = null;
+  reportResetAt = '';
+  cart = [];
+  paidCents = 0;
+  orderNumber = 1;
+  lastTicketHtml = '';
+  saveConfig();
+  saveReportState();
+  saveSales();
+  saveOrderNumber();
+  saveLastTicket();
+  renderSettings();
+  renderProducts();
+  renderCart();
+  updatePayment();
+  showMessage('Application réinitialisée', "L'application est revenue aux réglages par défaut.");
+}
+function handleSettingsReset() {
+  const tab = activeSettingsTab();
+  if (tab === 'products') {
+    return showConfirm('Vider les boutons produits', 'Effacer le nom, le prix et les réglages de tous les boutons produits ? Les emplacements restent en place.', resetDraftProducts);
+  }
+  if (tab === 'foods') {
+    return showConfirm('Effacer les aliments', 'Effacer tous les aliments de base ?', resetDraftFoods);
+  }
+  if (tab === 'stocks') {
+    return showConfirm('Réinitialiser les stocks', 'Mettre tous les stocks en non suivi ? Aucun bouton ne sera bloqué.', resetDraftStocks);
+  }
+  if (tab === 'volunteers') {
+    return showConfirm('Effacer les bénévoles', 'Effacer toute la liste des bénévoles ?', resetDraftVolunteers);
+  }
+  if (tab === 'orders') {
+    return showConfirm('Effacer les commandes', 'Effacer toutes les commandes ? Cette action supprimera aussi le dernier ticket et remettra la numérotation à 1.', clearAllOrdersAndTickets);
+  }
+  if (tab === 'report') {
+    return showConfirm('Réinitialiser le bilan', 'Réinitialiser le bilan ? Les ventes et remboursements enregistrés seront remis à zéro.', resetReportData);
+  }
+  if (tab === 'general') {
+    return showConfirm('Réinitialiser toute l’application', 'Tout effacer et revenir aux paramètres par défaut ? Produits, aliments, stocks, bénévoles, commandes et bilan seront réinitialisés.', resetWholeApplication);
+  }
+}
+
 document.getElementById('btnCloseChoice').addEventListener('click', () => document.getElementById('choiceDialog').close());
 document.getElementById('btnAddChoiceProduct').addEventListener('click', addChoiceProduct);
 document.getElementById('btnCloseSettings').addEventListener('click', () => document.getElementById('settingsDialog').close());
 document.getElementById('btnSaveSettings').addEventListener('click', saveSettings);
 document.getElementById('btnAddFood').addEventListener('click', () => { draftConfig.baseFoods.push({ id: uid('food'), name: 'Nouvel aliment', category: 'Viande', stock: '' }); renderSettings(); });
 document.getElementById('btnAddVolunteer').addEventListener('click', () => { draftConfig.volunteers ||= []; draftConfig.volunteers.push({ id: uid('vol'), name: 'Nouveau bénévole', active: true }); renderVolunteerEditor(); });
-document.getElementById('btnReset').addEventListener('click', () => showConfirm('Réinitialiser les paramètres', 'Remettre tous les réglages par défaut ?', () => { draftConfig = clone(DEFAULT_CONFIG); renderSettings(); }));
+document.getElementById('btnReset').addEventListener('click', handleSettingsReset);
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
@@ -1077,6 +1265,7 @@ document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', (
   if (btn.dataset.tab === 'orders') renderSettingsOrders();
   if (btn.dataset.tab === 'report') renderSettingsReport();
   if (btn.dataset.tab === 'export') exportCsv();
+  updateSettingsResetButton();
 }));
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
 renderProducts();
