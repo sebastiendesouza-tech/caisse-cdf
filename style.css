@@ -745,3 +745,6 @@ dialog { border: 0; border-radius: 18px; width: min(1180px, 96vw); max-height: 9
   box-shadow: none !important;
   border-top: 1px solid #e5e7eb;
 }
+
+
+.ticket-subline .ticket-product{padding-left:24px;font-size:.95em;}

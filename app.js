@@ -414,26 +414,48 @@ function checkMarker(qty) {
 function ticketLineHtml(name, qty, price, cls = '', withChecks = true) {
   return `<div class="ticket-line ${cls}"><div>${qty || ''}</div><div class="ticket-product">${escapeHtml(name)}</div><div class="checks">${withChecks ? checkMarker(qty || 1) : ''}</div><div class="ticket-price">${price === null ? '' : fmt(price)}</div></div>`;
 }
+function ticketLineBlock(line) {
+  let html = ticketLineHtml(line.name, line.qty, line.price, line.cls || '', line.withChecks);
+  if (line.composition) html += `<div class="ticket-subline no-check"><div></div><div class="ticket-composition">(${escapeHtml(line.composition)})</div><div></div><div></div></div>`;
+  return html;
+}
+function ticketItemCompare(a, b) {
+  return ticketSortIndex(a.category) - ticketSortIndex(b.category) || a.order - b.order;
+}
 function buildTicket() {
   const number = `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`;
-  const printable = [];
+  const regularLines = [];
+  const menuBlocks = [];
   cart.forEach((item, cartIndex) => {
-    if (item.type === 'menu' && item.ticketChildren && item.ticketChildren.length) {
-      item.ticketChildren.forEach((child, childIndex) => {
-        printable.push({
-          order: cartIndex + childIndex / 100,
-          category: child.category || 'Plat',
-          name: child.name,
-          qty: child.qty || item.qty || 1,
-          price: null,
-          composition: child.composition || '',
-          withChecks: child.withCheck !== false,
-          cls: 'ticket-subline-as-main'
-        });
+    if (item.type === 'menu') {
+      const children = (item.ticketChildren || []).map((child, childIndex) => ({
+        order: childIndex,
+        category: child.category || 'Plat',
+        name: child.name,
+        qty: child.qty || item.qty || 1,
+        price: null,
+        composition: child.composition || '',
+        withChecks: true,
+        cls: 'ticket-subline'
+      })).sort(ticketItemCompare);
+      menuBlocks.push({
+        order: cartIndex,
+        category: item.category || 'Plat',
+        main: {
+          order: cartIndex,
+          category: item.category || 'Plat',
+          name: item.name,
+          qty: item.qty,
+          price: item.qty * item.price,
+          composition: '',
+          withChecks: false,
+          cls: 'ticket-main-line ticket-menu-line'
+        },
+        children
       });
       return;
     }
-    printable.push({
+    regularLines.push({
       order: cartIndex,
       category: item.category || 'Plat',
       name: item.name,
@@ -444,12 +466,12 @@ function buildTicket() {
       cls: 'ticket-main-line'
     });
   });
-  printable.sort((a, b) => ticketSortIndex(a.category) - ticketSortIndex(b.category) || a.order - b.order);
-  const lines = printable.map(line => {
-    let html = ticketLineHtml(line.name, line.qty, line.price, line.cls || '', line.withChecks);
-    if (line.composition) html += `<div class="ticket-subline no-check"><div></div><div class="ticket-composition">(${escapeHtml(line.composition)})</div><div></div><div></div></div>`;
-    return html;
-  }).join('');
+  regularLines.sort(ticketItemCompare);
+  menuBlocks.sort(ticketItemCompare);
+  const lines = [
+    ...regularLines.map(ticketLineBlock),
+    ...menuBlocks.map(block => ticketLineBlock(block.main) + block.children.map(ticketLineBlock).join(''))
+  ].join('');
   const html = `<div class="ticket-title">Commande n° ${number}</div>${lines}<div class="ticket-bottom">${paymentMethod}</div><div class="ticket-bottom">Total : ${fmt(total())}</div>`;
   document.getElementById('printArea').innerHTML = html;
   lastTicketHtml = html;
