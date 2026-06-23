@@ -709,7 +709,7 @@ function validateSale(extra = {}) {
   const kind = extra.kind || 'sale';
   const stamp = saleTimestampParts();
   sales.push({ kind, orderNumber: `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`, date: stamp.date, hour: stamp.hour, hourLabel: stamp.hourLabel, paymentMethod: extra.paymentMethod || paymentMethod, paid: extra.paid ?? paidAmount(), change: extra.change ?? Math.max(0, paidAmount() - total()), total: total(), items: clone(cart), volunteerId: extra.volunteerId || '', volunteerName: extra.volunteerName || '', settled: extra.settled ?? true, refunds: [] });
-  consumeStock();
+ 
   saveSales();
   if (shouldPrint) window.print();
   orderNumber += 1; saveOrderNumber(); cart = []; paidCents = 0; renderProducts(); renderCart();
