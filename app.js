@@ -97,11 +97,46 @@ const SUPABASE_URL = 'https://rounfqdogmrynvznqimv.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_Fq68zylBMnVFXrV7CvGMSg_qWNOKrZr';
 const SUPABASE_CONFIG_TABLE = 'caisse_config';
 const SUPABASE_CONFIG_ID = 1;
-const supabaseClient = (window.supabase && SUPABASE_KEY && SUPABASE_KEY !== 'COLLEZ_ICI_VOTRE_PUBLISHABLE_KEY')
+
+const supabaseClient = (window.supabase && SUPABASE_KEY)
   ? window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
   : null;
+
 let supabaseReady = false;
 let supabaseSaving = false;
+let supabaseReceiving = false;
+
+if (supabaseClient) {
+  supabaseClient
+    .channel('caisse_config_realtime')
+    .on(
+      'postgres_changes',
+      {
+        event: 'UPDATE',
+        schema: 'public',
+        table: SUPABASE_CONFIG_TABLE,
+        filter: `id=eq.${SUPABASE_CONFIG_ID}`
+      },
+      (payload) => {
+        console.log('Mise à jour Supabase reçue', payload);
+
+        if (supabaseSaving) return;
+        if (!payload.new || !payload.new.data) return;
+
+        supabaseReceiving = true;
+        config = payload.new.data;
+        localStorage.setItem('caisse_config', JSON.stringify(config));
+
+        setTimeout(() => {
+          supabaseReceiving = false;
+          location.reload();
+        }, 300);
+      }
+    )
+    .subscribe((status) => {
+      console.log('Realtime Supabase:', status);
+    });
+}
 
 let storedConfig = JSON.parse(localStorage.getItem('caisse_config') || 'null');
 let config = normalizeConfig((!storedConfig || Number(storedConfig.configVersion || 0) < 13) ? DEFAULT_CONFIG : storedConfig);
