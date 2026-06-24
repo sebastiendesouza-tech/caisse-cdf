@@ -149,7 +149,7 @@ async function saveSaleToSupabase(sale) {
 
 async function loadSalesFromSupabase() {
   if (!supabaseClient) return;
-
+console.log('Manifestation active =', currentEventId);
   const { data, error } = await supabaseClient
     .from('sales')
     .select('*')
@@ -164,6 +164,7 @@ async function loadSalesFromSupabase() {
   supabaseSales = (data || [])
     .map(row => row.sale_data)
     .filter(Boolean);
+  console.log('Ventes trouvées =', data);
 }
 async function syncOrderNumberFromSupabase() {
   if (!supabaseClient) return;
