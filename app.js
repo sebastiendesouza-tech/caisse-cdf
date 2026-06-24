@@ -166,6 +166,7 @@ console.log('Manifestation active =', currentEventId);
     .filter(Boolean);
   console.log('Ventes trouvées =', data);
 }
+
 async function syncOrderNumberFromSupabase() {
   if (!supabaseClient) return;
 
