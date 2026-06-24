@@ -213,12 +213,15 @@ async function loadConfigFromSupabase() {
 
   if (data && data.data) {
     config = normalizeConfig(data.data);
-    renderEventTitle();
+
     if (config.currentEventId) {
-  currentEventId = config.currentEventId;
-  localStorage.setItem('caisse_event_id', currentEventId);
-}
+      currentEventId = config.currentEventId;
+      localStorage.setItem('caisse_event_id', currentEventId);
+    }
+
     localStorage.setItem('caisse_config', JSON.stringify(config));
+
+    renderEventTitle();
 
     if (draftConfig) draftConfig = clone(config);
 
@@ -231,7 +234,6 @@ async function loadConfigFromSupabase() {
 
   supabaseReady = true;
 }
-
 async function saveConfigToSupabase() {
   if (supabaseReceiving) return;
   if (!supabaseClient || supabaseSaving) return;
