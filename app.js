@@ -146,12 +146,14 @@ async function saveSaleToSupabase(sale) {
     console.error('Erreur sauvegarde vente Supabase', error);
   }
 }
+
 async function loadSalesFromSupabase() {
   if (!supabaseClient) return;
 
   const { data, error } = await supabaseClient
     .from('sales')
     .select('*')
+    .eq('event_id', currentEventId)
     .order('created_at', { ascending: true });
 
   if (error) {
