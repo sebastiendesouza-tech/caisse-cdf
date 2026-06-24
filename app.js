@@ -145,7 +145,24 @@ function saveConfig() {
   localStorage.setItem('caisse_config', JSON.stringify(config));
   saveConfigToSupabase();
 }
+async function saveSaleToSupabase(sale) {
+  if (!supabaseClient) return;
 
+  const { error } = await supabaseClient
+    .from('sales')
+    .insert({
+      order_number: sale.orderNumber,
+      date: sale.date,
+      hour: sale.hour,
+      payment_method: sale.paymentMethod,
+      total: sale.total,
+      sale_data: sale
+    });
+
+  if (error) {
+    console.error('Erreur sauvegarde vente Supabase', error);
+  }
+}
 async function loadConfigFromSupabase() {
   if (!supabaseClient) {
     console.warn('Supabase non configuré');
