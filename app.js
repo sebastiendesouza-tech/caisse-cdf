@@ -1405,6 +1405,8 @@ async function renderSettingsReport() {
   sales = previousSales;
 }
 async function openOrders() {
+ 
+  alert('OPEN ORDERS');
   await loadSalesFromSupabase();
 
   console.log('Ventes Supabase chargées', supabaseSales);
