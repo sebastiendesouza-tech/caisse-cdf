@@ -1404,11 +1404,21 @@ async function renderSettingsReport() {
 
   sales = previousSales;
 }
-function openOrders() {
+async function openOrders() {
+  await loadSalesFromSupabase();
+
+  const previousSales = sales;
+
+  if (supabaseSales.length) {
+    sales = supabaseSales;
+  }
+
   document.getElementById('ordersList').innerHTML = ordersHtml();
   bindRefundButtons(document.getElementById('ordersList'));
   bindVolunteerPayButtons(document.getElementById('ordersList'));
   document.getElementById('ordersDialog').showModal();
+
+  sales = previousSales;
 }
 function openRefund(index) {
   refundSaleIndex = index;
