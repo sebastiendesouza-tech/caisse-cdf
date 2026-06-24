@@ -106,6 +106,7 @@
         <button class="tab" data-tab="volunteers">Bénévoles</button>
         <button class="tab" data-tab="orders">Commandes</button>
         <button class="tab" data-tab="report">Bilan</button>
+        <button class="tab" data-tab="new-event">Nouvelle manifestation</button>
         <button class="tab" data-tab="export">Export CSV</button>
       </div>
       <section id="tab-products" class="tab-panel active">
@@ -142,6 +143,18 @@
         <p class="hint">Bilan des ventes, paiements et remboursements.</p>
         <div id="settingsReportContent"></div>
       </section>
+      <section id="tab-new-event" class="tab-panel">
+      <h3>Nouvelle manifestation</h3>
+    
+      <p class="hint">
+        Cette action crée une nouvelle manifestation, remet le numéro de ticket à A0001
+        et vide les ventes locales.
+      </p>
+    
+      <button id="btnNewEvent" class="danger">
+        🎉 Démarrer une nouvelle manifestation
+      </button>
+    </section>
       <section id="tab-export" class="tab-panel">
         <p class="hint">Clique sur l'onglet pour lancer directement l'export CSV.</p>
         <div class="export-status">L'export CSV se lance automatiquement.</div>
