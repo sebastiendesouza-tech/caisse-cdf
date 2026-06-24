@@ -486,17 +486,19 @@ function addProduct(id) {
   const p = config.products.find(x => x.id === id);
   if (!p || !p.name) return;
 
-  if (Number(p.stock || 0) <= 0) {
-    alert('Stock insuffisant pour ' + p.name);
-    renderProducts();
-    return;
-  }
+if (isTracked(p.stock) && Number(p.stock) <= 0) {
+  alert('Stock insuffisant pour ' + p.name);
+  renderProducts();
+  return;
+}
 
   if (p.type === 'compose' && (p.choices || []).length) return openChoiceDialog(p);
   if (p.type === 'menu' && (p.menuSections || []).length) return openMenuDialog(p);
 
-  p.stock = Math.max(0, Number(p.stock || 0) - 1);
+if (isTracked(p.stock)) {
+  p.stock = Math.max(0, Number(p.stock) - 1);
   saveConfig();
+}
 
   addCartLine({
     id: p.id,
@@ -541,20 +543,24 @@ function renderCart() {
 function restoreStock(productId, qty) {
   const p = config.products.find(x => x.id === productId);
   if (!p) return;
-  p.stock = Number(p.stock || 0) + Number(qty || 0);
-}
 
+  if (!isTracked(p.stock)) return;
+
+  p.stock = Number(p.stock) + Number(qty || 0);
+}
 function reserveStock(productId, qty) {
   const p = config.products.find(x => x.id === productId);
   if (!p) return false;
 
-  if (Number(p.stock || 0) < Number(qty || 0)) {
+  if (!isTracked(p.stock)) return true;
+
+  if (Number(p.stock) < Number(qty || 0)) {
     alert('Stock insuffisant pour ' + p.name);
     renderProducts();
     return false;
   }
 
-  p.stock = Number(p.stock || 0) - Number(qty || 0);
+  p.stock = Number(p.stock) - Number(qty || 0);
   return true;
 }
 
