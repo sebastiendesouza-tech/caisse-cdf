@@ -129,7 +129,7 @@ function saveConfig() {
 }
 async function saveSaleToSupabase(sale) {
   if (!supabaseClient) return;
-
+  console.log('Vente enregistrée avec event_id =', currentEventId);
   const { error } = await supabaseClient
     .from('sales')
     .insert({
