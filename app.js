@@ -930,6 +930,13 @@ function addMenuProduct() {
   pendingChoiceProduct = null;
 }
 
+function renderSettingsOrders() {
+  const el = document.getElementById('settingsOrdersList');
+  if (!el) return;
+  el.innerHTML = ordersHtml();
+  bindRefundButtons(el);
+  bindVolunteerPayButtons(el);
+}
 function openSettings() { draftConfig = clone(config); renderSettings(); updateSettingsResetButton(); document.getElementById('settingsDialog').showModal(); }
 function renderSettings() { renderProductEditor(); renderFoodEditor(); renderStockEditor(); renderGeneralEditor(); renderVolunteerEditor(); renderSettingsOrders(); renderSettingsReport(); }
 function renderProductEditor() {
