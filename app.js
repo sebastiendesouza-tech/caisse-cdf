@@ -1713,6 +1713,11 @@ document.getElementById('btnSaveSettings').addEventListener('click', saveSetting
 document.getElementById('btnAddFood').addEventListener('click', () => { draftConfig.baseFoods.push({ id: uid('food'), name: 'Nouvel aliment', category: 'Viande', stock: '' }); renderSettings(); });
 document.getElementById('btnAddVolunteer').addEventListener('click', () => { draftConfig.volunteers ||= []; draftConfig.volunteers.push({ id: uid('vol'), name: 'Nouveau bénévole', active: true }); renderVolunteerEditor(); });
 document.getElementById('btnReset').addEventListener('click', handleSettingsReset);
+const btnNewEvent = document.getElementById('btnNewEvent');
+
+if (btnNewEvent) {
+  btnNewEvent.addEventListener('click', startNewEvent);
+}
 document.querySelectorAll('.tab').forEach(btn => btn.addEventListener('click', () => {
   document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
