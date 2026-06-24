@@ -145,6 +145,25 @@ async function saveSaleToSupabase(sale) {
     console.error('Erreur sauvegarde vente Supabase', error);
   }
 }
+async function loadSalesFromSupabase() {
+  if (!supabaseClient) return;
+
+  const { data, error } = await supabaseClient
+    .from('sales')
+    .select('*')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    console.error('Erreur chargement ventes Supabase', error);
+    return;
+  }
+
+  supabaseSales = (data || [])
+    .map(row => row.sale_data)
+    .filter(Boolean);
+}
+
+
 async function loadConfigFromSupabase() {
   if (!supabaseClient) {
     console.warn('Supabase non configuré');
@@ -1332,10 +1351,20 @@ function renderSettingsReport() {
   el.innerHTML = reportHtml();
   bindVolunteerPayButtons(el);
 }
-function openReport() {
+async function openReport() {
+  await loadSalesFromSupabase();
+
+  const previousSales = sales;
+
+  if (supabaseSales.length) {
+    sales = supabaseSales;
+  }
+
   document.getElementById('reportContent').innerHTML = reportHtml();
   bindVolunteerPayButtons(document.getElementById('reportContent'));
   document.getElementById('reportDialog').showModal();
+
+  sales = previousSales;
 }
 function ordersHtml() {
   return sales.map((s, idx) => {
