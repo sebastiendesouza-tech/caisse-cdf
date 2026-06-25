@@ -1866,7 +1866,7 @@ function initDeviceSetupDialog() {
 
   if (!dialog || !btnSave) return;
 
-  btnSave.addEventListener('click', () => {
+  btnSave.addEventListener('click', async () => {
     const deviceName = document.getElementById('deviceName').value.trim();
     const deviceCode = document.getElementById('deviceCode').value;
     const printMode = document.getElementById('devicePrintMode').value;
@@ -1875,7 +1875,14 @@ function initDeviceSetupDialog() {
       showMessage('Configuration incomplète', 'Indique un nom pour cet appareil.');
       return;
     }
-
+    
+if (!(await isDeviceCodeAvailable(deviceCode))) {
+    showMessage(
+        "Poste déjà utilisé",
+        `Le poste ${deviceCode} est déjà utilisé par une autre caisse.`
+    );
+    return;
+}
     saveDeviceConfig({
       deviceName,
       deviceCode,
