@@ -139,7 +139,8 @@ async function saveSaleToSupabase(sale) {
       payment_method: sale.paymentMethod,
       total: sale.total,
       sale_data: sale,
-      event_id: currentEventId
+      event_id: currentEventId,
+      printed: false
     });
 
   if (error) {
