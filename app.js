@@ -371,7 +371,7 @@ function showMessage(title, text) {
   if (!dlg) { window.alert((title ? title + '\n' : '') + (text || '')); return; }
   document.getElementById('messageTitle').textContent = title || 'Information';
   document.getElementById('messageText').textContent = text || '';
-  document.getElementById('messageCancel')..display = 'none';
+  document.getElementById('messageCancel').style.display = 'none';
   const ok = document.getElementById('messageOk');
   ok.textContent = 'OK';
   ok.onclick = () => dlg.close();
@@ -573,7 +573,7 @@ function renderProducts() {
   console.log('renderProducts eventName =', config.eventName);
   const eventTitle = document.getElementById('eventTitle');
   if (eventTitle) eventTitle.textContent = config.eventName || 'Comité des Fêtes';
-  document.documentElement..setProperty('--ticket-color', config.ticketColor);
+  document.documentElement.style.setProperty('--ticket-color', config.ticketColor);
   const wrap = document.getElementById('categories');
   const meat = document.getElementById('meatStock');
   const groups = {};
@@ -596,7 +596,7 @@ function renderMeatStockBox() {
 }
 function productButtonHtml(p) {
   const col = colorFor(p.category);
-  const  = `background:${col.bg};color:${col.fg}`;
+  const  style = `background:${col.bg};color:${col.fg}`;
   if (!p.name) return `<button class="product-btn empty-product" style="${style}" disabled><strong>Libre</strong></button>`;
   const out = !stockAvailable(p);
   const stockLabel = isTracked(p.stock) ? `<em class="btn-stock">Stock ${Number(p.stock)}</em>` : '';
@@ -1847,9 +1847,7 @@ function initDeviceSetupDialog() {
     dialog.showModal();
   }
 }
-renderProducts();
-renderCart();
-initSupabaseSync();
+
 renderProducts();
 renderCart();
 initSupabaseSync();
