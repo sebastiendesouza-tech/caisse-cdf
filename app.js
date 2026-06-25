@@ -195,7 +195,29 @@ async function syncOrderNumberFromSupabase() {
 
   console.log('Prochain ticket :', orderNumber);
 }
+const DEVICE_CONFIG_KEY = 'sds_device_config';
 
+function getDeviceConfig() {
+  try {
+    return JSON.parse(localStorage.getItem(DEVICE_CONFIG_KEY)) || null;
+  } catch {
+    return null;
+  }
+}
+
+function saveDeviceConfig(deviceConfig) {
+  localStorage.setItem(DEVICE_CONFIG_KEY, JSON.stringify(deviceConfig));
+}
+
+function getDeviceCode() {
+  const deviceConfig = getDeviceConfig();
+  return deviceConfig?.deviceCode || config?.orderPrefix || 'A';
+}
+
+function getDeviceName() {
+  const deviceConfig = getDeviceConfig();
+  return deviceConfig?.deviceName || 'Appareil inconnu';
+}
 async function loadConfigFromSupabase() {
   if (!supabaseClient) {
     console.warn('Supabase non configuré');
