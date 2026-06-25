@@ -140,7 +140,8 @@ async function saveSaleToSupabase(sale) {
       total: sale.total,
       sale_data: sale,
       event_id: currentEventId,
-      printed: false
+      printed: false,
+      device_code: getDeviceCode()
     });
 
   if (error) {
@@ -218,6 +219,8 @@ function getDeviceName() {
   const deviceConfig = getDeviceConfig();
   return deviceConfig?.deviceName || 'Appareil inconnu';
 }
+
+
 async function loadConfigFromSupabase() {
   if (!supabaseClient) {
     console.warn('Supabase non configuré');
