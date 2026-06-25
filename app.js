@@ -1435,7 +1435,8 @@ function reportHtml() {
   const foodRows = Object.entries(data.foodMap || {}).sort((a,b)=>a[0].localeCompare(b[0], 'fr')).map(([name,v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td></tr>`).join('');
   const hourRows = Object.entries(data.hourMap || {}).sort((a,b)=>a[0].localeCompare(b[0], 'fr')).map(([hour,v]) => `<tr><td>${escapeHtml(hour)}</td><td>${v.orders}</td><td>${fmt(v.total)}</td></tr>`).join('');
   const volunteerRows = (config.volunteers || []).map(v => ({ v, amount: volunteerPendingAmount(v.id) })).filter(x => x.amount > 0).map(x => `<tr><td>${escapeHtml(x.v.name)}</td><td>${fmt(x.amount)}</td><td><button class="validate" data-pay-volunteer="${escapeHtml(x.v.id)}">Régler</button></td></tr>`).join('');
-  return `<div class="report-cards">return `
+  return `
+
   <div class="dashboard-cards">
     <div class="dashboard-card">
       <strong>💶 Chiffre d'affaires</strong>
@@ -1453,7 +1454,8 @@ function reportHtml() {
       <strong>🧾 Tickets</strong>
       <span>${data.orderCount || 0}</span>
     </div>
-  </div><div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${data.orderCount || 0}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Statistiques horaires des commandes</h3><table class="data-table"><thead><tr><th>Heure</th><th>Commandes</th><th>Total</th></tr></thead><tbody>${hourRows || '<tr><td colspan="3">Aucune commande</td></tr>'}</tbody></table><h3>Tous les produits</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucun produit</td></tr>'}</tbody></table><h3>Tous les aliments</h3><table class="data-table"><thead><tr><th>Aliment</th><th>Qté utilisée</th></tr></thead><tbody>${foodRows || '<tr><td colspan="2">Aucun aliment</td></tr>'}</tbody></table><h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`;
+  </div>
+  <div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${data.orderCount || 0}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Statistiques horaires des commandes</h3><table class="data-table"><thead><tr><th>Heure</th><th>Commandes</th><th>Total</th></tr></thead><tbody>${hourRows || '<tr><td colspan="3">Aucune commande</td></tr>'}</tbody></table><h3>Tous les produits</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucun produit</td></tr>'}</tbody></table><h3>Tous les aliments</h3><table class="data-table"><thead><tr><th>Aliment</th><th>Qté utilisée</th></tr></thead><tbody>${foodRows || '<tr><td colspan="2">Aucun aliment</td></tr>'}</tbody></table><h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`;
 }
 function bindVolunteerPayButtons(root = document) {
   root.querySelectorAll('[data-pay-volunteer]').forEach(b => b.addEventListener('click', e => openVolunteerPayment(e.currentTarget.dataset.payVolunteer)));
