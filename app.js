@@ -231,7 +231,29 @@ function getDeviceName() {
   const deviceConfig = getDeviceConfig();
   return deviceConfig?.deviceName || 'Appareil inconnu';
 }
+async function registerDevice() {
+  if (!supabaseClient) return;
 
+  const device = getDeviceConfig();
+  if (!device) return;
+
+  const { error } = await supabaseClient
+    .from('devices')
+    .update({
+      device_name: device.deviceName,
+      device_type: /iPad/i.test(navigator.userAgent) ? 'ipad' : 'windows',
+      current_device: getDeviceInstanceId(),
+      device_status: 'busy',
+      print_mode: device.printMode,
+      app_version: '2026.06.25',
+      last_seen: new Date().toISOString()
+    })
+    .eq('device_code', device.deviceCode);
+
+  if (error) {
+    console.error('Erreur registerDevice', error);
+  }
+}
 
 async function loadConfigFromSupabase() {
   if (!supabaseClient) {
