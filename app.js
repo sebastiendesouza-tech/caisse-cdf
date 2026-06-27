@@ -64,19 +64,25 @@ const DEFAULT_CONFIG = {
     { id: 'p-boisson-libre', group: 'Boissons', category: 'Boissons sans alcool', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
 
     { id: 'p-frites', group: 'Restauration', category: 'Plat', name: 'Barquette de frites', price: 2.50, type: 'simple', components: [], refundable: true, stock: '' },
-    { id: 'p-assiette-gourmande', group: 'Restauration', category: 'Plat', name: 'Assiette gourmande', price: 7, type: 'compose', components: [], choices: [
-      { category: 'Viande', min: 2, max: 2, clientChoice: true, options: [{ foodId: 'food-saucisse', supplement: 0 }, { foodId: 'food-merguez', supplement: 0 }] },
-      { category: 'Accompagnement', min: 1, max: 1, clientChoice: false, options: [{ foodId: 'food-frites', supplement: 0 }] }
-    ], refundable: true, stock: '' },
-    { id: 'p-menu', group: 'Restauration', category: 'Plat', name: 'Menu', price: 10, type: 'menu', components: [], refundable: true, stock: '', menuSections: [
-      { section: 'Boissons', clientChoice: true, max: 1, options: [
-        { productId: 'p-eau-50', supplement: -0.50 },
-        { productId: 'p-coca', supplement: 0 }, { productId: 'p-oasis', supplement: 0 }, { productId: 'p-ice-tea', supplement: 0 }, { productId: 'p-biere-25', supplement: 0 },
-        { productId: 'p-verre-rose', supplement: 0.50 }, { productId: 'p-verre-blanc', supplement: 0.50 }, { productId: 'p-verre-rouge', supplement: 0.50 }
-      ]},
-      { section: 'Plat', clientChoice: false, max: 1, options: [{ productId: 'p-assiette-gourmande', supplement: 0 }] },
-      { section: 'Dessert', clientChoice: true, max: 1, options: [{ productId: 'p-glace-vanille', supplement: 0 }] }
-    ] },
+    {
+      id: 'p-assiette-gourmande', group: 'Restauration', category: 'Plat', name: 'Assiette gourmande', price: 7, type: 'compose', components: [], choices: [
+        { category: 'Viande', min: 2, max: 2, clientChoice: true, options: [{ foodId: 'food-saucisse', supplement: 0 }, { foodId: 'food-merguez', supplement: 0 }] },
+        { category: 'Accompagnement', min: 1, max: 1, clientChoice: false, options: [{ foodId: 'food-frites', supplement: 0 }] }
+      ], refundable: true, stock: ''
+    },
+    {
+      id: 'p-menu', group: 'Restauration', category: 'Plat', name: 'Menu', price: 10, type: 'menu', components: [], refundable: true, stock: '', menuSections: [
+        {
+          section: 'Boissons', clientChoice: true, max: 1, options: [
+            { productId: 'p-eau-50', supplement: -0.50 },
+            { productId: 'p-coca', supplement: 0 }, { productId: 'p-oasis', supplement: 0 }, { productId: 'p-ice-tea', supplement: 0 }, { productId: 'p-biere-25', supplement: 0 },
+            { productId: 'p-verre-rose', supplement: 0.50 }, { productId: 'p-verre-blanc', supplement: 0.50 }, { productId: 'p-verre-rouge', supplement: 0.50 }
+          ]
+        },
+        { section: 'Plat', clientChoice: false, max: 1, options: [{ productId: 'p-assiette-gourmande', supplement: 0 }] },
+        { section: 'Dessert', clientChoice: true, max: 1, options: [{ productId: 'p-glace-vanille', supplement: 0 }] }
+      ]
+    },
     { id: 'p-glace-vanille', group: 'Restauration', category: 'Dessert', name: 'Glace vanille', price: 2, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-popcorn', group: 'Restauration', category: 'Dessert', name: 'Popcorn', price: 1, type: 'simple', components: [], refundable: true, stock: '' },
     { id: 'p-glace-eau', group: 'Restauration', category: 'Dessert', name: '', price: 0, type: 'simple', components: [], refundable: true, stock: '' },
@@ -143,8 +149,8 @@ async function saveSaleToSupabase(sale) {
       total: sale.total,
       sale_data: sale,
       event_id: currentEventId,
-      printed: false,
-      device_code: getDeviceCode()
+      device_code: getDeviceCode(),
+      printed: false
     });
 
   if (error) {
@@ -154,7 +160,7 @@ async function saveSaleToSupabase(sale) {
 
 async function loadSalesFromSupabase() {
   if (!supabaseClient) return;
-console.log('Manifestation active =', currentEventId);
+  console.log('Manifestation active =', currentEventId);
   const { data, error } = await supabaseClient
     .from('sales')
     .select('*')
@@ -273,6 +279,18 @@ async function registerDevice() {
     console.error('Erreur registerDevice', error);
   }
 }
+function startCentralServices() {
+  if (getDeviceCode() !== 'A') return;
+
+  updateCentralDashboard();
+  updateDashboardStatus();
+
+  refreshCentralDashboard();
+
+  setInterval(refreshCentralDashboard, 5000);
+  setInterval(processPrintQueue, 5000);
+}
+
 
 async function loadConfigFromSupabase() {
   if (!supabaseClient) {
@@ -314,6 +332,21 @@ async function loadConfigFromSupabase() {
 
   supabaseReady = true;
 }
+
+
+const devicesEl = document.getElementById("dashboardDevices");
+
+if (devicesEl) {
+  devicesEl.innerHTML =
+    "<strong>📱 Caisses</strong><br><br>" +
+    data.map(device =>
+      `${device.device_status === "busy" ? "🟢" : "⚪"} ${device.device_code} - ${device.device_name || "Libre"}`
+    ).join("<br>");
+}
+
+
+
+
 async function saveConfigToSupabase() {
   if (supabaseReceiving) return;
   if (!supabaseClient || supabaseSaving) return;
@@ -356,16 +389,16 @@ function startSupabaseRealtime() {
 
         supabaseReceiving = true;
         console.log('remoteConfig eventName =', remoteConfig.eventName);
-console.log('remoteConfig currentEventId =', remoteConfig.currentEventId);
-config = normalizeConfig(remoteConfig);
+        console.log('remoteConfig currentEventId =', remoteConfig.currentEventId);
+        config = normalizeConfig(remoteConfig);
 
-if (config.currentEventId) {
-  currentEventId = config.currentEventId;
-  localStorage.setItem('caisse_event_id', currentEventId);
-}
+        if (config.currentEventId) {
+          currentEventId = config.currentEventId;
+          localStorage.setItem('caisse_event_id', currentEventId);
+        }
 
-localStorage.setItem('caisse_config', JSON.stringify(config));
-renderEventTitle();
+        localStorage.setItem('caisse_config', JSON.stringify(config));
+        renderEventTitle();
 
         if (draftConfig) draftConfig = clone(config);
 
@@ -389,7 +422,7 @@ async function initSupabaseSync() {
   await loadConfigFromSupabase();
   await syncOrderNumberFromSupabase();
   await registerDevice();
-
+  startCentralServices();
   if (supabaseClient) {
     if (!supabaseReady) await saveConfigToSupabase();
     startSupabaseRealtime();
@@ -493,15 +526,15 @@ function normalizeConfig(c) {
     c.products = c.products.map((p, i) => ({ id: 'p' + (i + 1), group: displayGroup(p.category), category: p.category || 'Plat', name: p.name || '', price: Number(p.price || 0), type: 'simple', components: [], refundable: true, stock: '' }));
   }
   c.configVersion = 2026.12;
-c.eventName ||= base.eventName;
+  c.eventName ||= base.eventName;
   c.orderPrefix ||= 'A';
   c.ticketColor ||= 'black';
   c.baseFoods ||= base.baseFoods;
   c.volunteers ||= base.volunteers;
-if (previousVersion < 18.17) {
-  c.eventName ||= base.eventName;
-  c.volunteers ||= clone(base.volunteers);
-}
+  if (previousVersion < 18.17) {
+    c.eventName ||= base.eventName;
+    c.volunteers ||= clone(base.volunteers);
+  }
   c.categoryColors ||= base.categoryColors;
   c.products ||= base.products;
   c.products.forEach((p, i) => { p.id ||= 'p' + (i + 1); p.group ||= displayGroup(p.category); p.type ||= 'simple'; p.components ||= []; p.choices ||= []; p.menuSections ||= []; p.refundable = p.refundable !== false; p.stock ??= ''; });
@@ -524,9 +557,9 @@ if (previousVersion < 18.17) {
   const glaceEau = c.products.find(p => p.id === 'p-glace-eau');
   if (glaceEau) { glaceEau.name = ''; glaceEau.price = 0; glaceEau.stock = ''; glaceEau.type = 'simple'; glaceEau.components = []; glaceEau.choices = []; glaceEau.menuSections = []; }
 
-  const productOrder = ['p-eau-50','p-eau-150','p-coca','p-oasis','p-ice-tea','p-biere-25','p-pichet-biere','p-verre-rose','p-verre-blanc','p-verre-rouge','p-bouteille-blanc','p-bouteille-rose','p-bouteille-rouge','p-cremant','p-verre-cremant','p-boisson-libre','p-cafe','p-frites','p-assiette-gourmande','p-menu','p-glace-vanille','p-popcorn','p-glace-eau','p-restau-libre-1','p-restau-libre-2','p-consigne','p-retour-consigne'];
+  const productOrder = ['p-eau-50', 'p-eau-150', 'p-coca', 'p-oasis', 'p-ice-tea', 'p-biere-25', 'p-pichet-biere', 'p-verre-rose', 'p-verre-blanc', 'p-verre-rouge', 'p-bouteille-blanc', 'p-bouteille-rose', 'p-bouteille-rouge', 'p-cremant', 'p-verre-cremant', 'p-boisson-libre', 'p-cafe', 'p-frites', 'p-assiette-gourmande', 'p-menu', 'p-glace-vanille', 'p-popcorn', 'p-glace-eau', 'p-restau-libre-1', 'p-restau-libre-2', 'p-consigne', 'p-retour-consigne'];
   if (previousVersion < 2026.03) {
-    c.products.sort((a,b) => {
+    c.products.sort((a, b) => {
       const ia = productOrder.indexOf(a.id), ib = productOrder.indexOf(b.id);
       return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
     });
@@ -641,7 +674,7 @@ function renderMeatStockBox() {
 }
 function productButtonHtml(p) {
   const col = colorFor(p.category);
-  const  style = `background:${col.bg};color:${col.fg}`;
+  const style = `background:${col.bg};color:${col.fg}`;
   if (!p.name) return `<button class="product-btn empty-product" style="${style}" disabled><strong>Libre</strong></button>`;
   const out = !stockAvailable(p);
   const stockLabel = isTracked(p.stock) ? `<em class="btn-stock">Stock ${Number(p.stock)}</em>` : '';
@@ -652,19 +685,19 @@ function addProduct(id) {
   const p = config.products.find(x => x.id === id);
   if (!p || !p.name) return;
 
-if (isTracked(p.stock) && Number(p.stock) <= 0) {
-  alert('Stock insuffisant pour ' + p.name);
-  renderProducts();
-  return;
-}
+  if (isTracked(p.stock) && Number(p.stock) <= 0) {
+    alert('Stock insuffisant pour ' + p.name);
+    renderProducts();
+    return;
+  }
 
   if (p.type === 'compose' && (p.choices || []).length) return openChoiceDialog(p);
   if (p.type === 'menu' && (p.menuSections || []).length) return openMenuDialog(p);
 
-if (isTracked(p.stock)) {
-  p.stock = Math.max(0, Number(p.stock) - 1);
-  saveConfig();
-}
+  if (isTracked(p.stock)) {
+    p.stock = Math.max(0, Number(p.stock) - 1);
+    saveConfig();
+  }
 
   addCartLine({
     id: p.id,
@@ -805,58 +838,7 @@ function ticketLineBlock(line) {
 function ticketItemCompare(a, b) {
   return ticketSortIndex(a.category) - ticketSortIndex(b.category) || a.order - b.order;
 }
-function ticketHtmlFromData(number, items, method, totalAmount, paidValue = 0, changeValue = 0) {
-  const regularLines = [];
-  const menuBlocks = [];
-  (items || []).forEach((item, cartIndex) => {
-    if (item.type === 'menu') {
-      const children = (item.ticketChildren || []).map((child, childIndex) => ({
-        order: childIndex,
-        category: child.category || 'Plat',
-        name: child.name,
-        qty: child.qty || item.qty || 1,
-        price: null,
-        composition: child.composition || '',
-        withChecks: true,
-        cls: 'ticket-subline'
-      })).sort(ticketItemCompare);
-      menuBlocks.push({
-        order: cartIndex,
-        category: item.category || 'Plat',
-        main: {
-          order: cartIndex,
-          category: item.category || 'Plat',
-          name: item.name,
-          qty: item.qty,
-          price: item.qty * item.price,
-          composition: '',
-          withChecks: false,
-          cls: 'ticket-main-line ticket-menu-line'
-        },
-        children
-      });
-      return;
-    }
-    regularLines.push({
-      order: cartIndex,
-      category: item.category || 'Plat',
-      name: item.name,
-      qty: item.qty,
-      price: item.qty * item.price,
-      composition: item.detail || '',
-      withChecks: true,
-      cls: 'ticket-main-line'
-    });
-  });
-  regularLines.sort(ticketItemCompare);
-  menuBlocks.sort(ticketItemCompare);
-  const lines = [
-    ...regularLines.map(ticketLineBlock),
-    ...menuBlocks.map(block => ticketLineBlock(block.main) + block.children.map(ticketLineBlock).join(''))
-  ].join('');
-  const cashDetails = method === 'Espèces' ? `<div class="ticket-bottom">Payé : ${fmt(paidValue)}</div><div class="ticket-bottom">À rendre : ${fmt(changeValue)}</div>` : '';
-  return `<div class="ticket-title">Commande n° ${escapeHtml(number)}</div>${lines}<div class="ticket-bottom">${escapeHtml(method || '')}</div><div class="ticket-bottom">Total : ${fmt(totalAmount)}</div>${cashDetails}`;
-}
+
 function printTicketForSale(sale) {
   const html = ticketHtmlFromData(sale.orderNumber, sale.items || [], sale.paymentMethod || paymentMethod, Number(sale.total || 0), Number(sale.paid || 0), Number(sale.change || 0));
   document.getElementById('printArea').innerHTML = html;
@@ -864,6 +846,7 @@ function printTicketForSale(sale) {
   saveLastTicket();
   window.print();
 }
+
 function buildTicket() {
   const number = `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`;
   const html = ticketHtmlFromData(number, cart, paymentMethod, total(), paidAmount(), Math.max(0, paidAmount() - total()));
@@ -871,6 +854,8 @@ function buildTicket() {
   lastTicketHtml = html;
   saveLastTicket();
 }
+
+
 function reprintLastTicket() {
   if (!lastTicketHtml) { showMessage('Aucun ticket', 'Aucun dernier ticket à réimprimer.'); return; }
   document.getElementById('printArea').innerHTML = lastTicketHtml;
@@ -880,40 +865,55 @@ function saleTimestampParts(date = new Date()) {
   return { date: date.toISOString(), hour: date.getHours(), hourLabel: `${String(date.getHours()).padStart(2, '0')}h-${String(date.getHours() + 1).padStart(2, '0')}h` };
 }
 function validateSale(extra = {}) {
-  const shouldPrint = extra.print !== false;
+  const deviceConfig = getDeviceConfig();
+  const printMode = deviceConfig?.printMode || 'central';
+
+  const shouldPrint = extra.print !== false && printMode === 'direct';
+
   if (shouldPrint) buildTicket();
+
   const kind = extra.kind || 'sale';
   const stamp = saleTimestampParts();
-const sale = {
-  kind,
-  orderNumber: `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`,
-  date: stamp.date,
-  hour: stamp.hour,
-  hourLabel: stamp.hourLabel,
-  paymentMethod: extra.paymentMethod || paymentMethod,
-  paid: extra.paid ?? paidAmount(),
-  change: extra.change ?? Math.max(0, paidAmount() - total()),
-  total: total(),
-  items: clone(cart),
-  volunteerId: extra.volunteerId || '',
-  volunteerName: extra.volunteerName || '',
-  settled: extra.settled ?? true,
-  refunds: []
-};
 
-sales.push(sale);
-saveSaleToSupabase(sale);
+  const sale = {
+    kind,
+    orderNumber: `${config.orderPrefix}${String(orderNumber).padStart(4, '0')}`,
+    date: stamp.date,
+    hour: stamp.hour,
+    hourLabel: stamp.hourLabel,
+    paymentMethod: extra.paymentMethod || paymentMethod,
+    paid: extra.paid ?? paidAmount(),
+    change: extra.change ?? Math.max(0, paidAmount() - total()),
+    total: total(),
+    items: clone(cart),
+    volunteerId: extra.volunteerId || '',
+    volunteerName: extra.volunteerName || '',
+    settled: extra.settled ?? true,
+    refunds: []
+  };
+
+  sales.push(sale);
+  saveSaleToSupabase(sale);
   saveSales();
+
   if (shouldPrint) window.print();
-  orderNumber += 1; saveOrderNumber(); cart = []; paidCents = 0; renderProducts(); renderCart();
+
+  orderNumber += 1;
+  saveOrderNumber();
+
+  cart = [];
+  paidCents = 0;
+
+  renderProducts();
+  renderCart();
 }
 
 function exportCsv() {
   const settingsDialog = document.getElementById('settingsDialog');
   if (settingsDialog && settingsDialog.open) settingsDialog.close();
-  const rows = [['type','commande','date','heure','paiement','benevole','regle','paye','rendu','produit','quantite','prix_unitaire','total_ligne','total_commande','motif']];
+  const rows = [['type', 'commande', 'date', 'heure', 'paiement', 'benevole', 'regle', 'paye', 'rendu', 'produit', 'quantite', 'prix_unitaire', 'total_ligne', 'total_commande', 'motif']];
   sales.forEach(s => (s.items || []).forEach(i => rows.push([s.kind || 'sale', s.orderNumber, s.date, s.hourLabel || orderHourLabel(s), s.paymentMethod, s.volunteerName || '', s.settled === false ? 'non' : 'oui', s.paid || '', s.change || '', i.name, i.qty, i.price, i.qty * i.price, s.total, s.reason || ''])));
-  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"','""')}"`).join(';')).join('\n');
+  const csv = rows.map(r => r.map(v => `"${String(v).replaceAll('"', '""')}"`).join(';')).join('\n');
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'ventes-caisse.csv'; a.click();
 }
@@ -1431,9 +1431,9 @@ function computeReportData(list = salesForReport()) {
       });
     });
   });
-  const gross = list.filter(s => (s.kind || 'sale') === 'sale').reduce((a,s)=>a+Number(s.total||0),0);
-  const refunds = list.filter(s => s.kind === 'refund').reduce((a,s)=>a+Math.abs(Number(s.total||0)),0);
-  const volunteerPending = list.filter(s => s.kind === 'volunteer' && s.settled === false).reduce((a,s)=>a+Number(s.total||0),0);
+  const gross = list.filter(s => (s.kind || 'sale') === 'sale').reduce((a, s) => a + Number(s.total || 0), 0);
+  const refunds = list.filter(s => s.kind === 'refund').reduce((a, s) => a + Math.abs(Number(s.total || 0)), 0);
+  const volunteerPending = list.filter(s => s.kind === 'volunteer' && s.settled === false).reduce((a, s) => a + Number(s.total || 0), 0);
   return { totals, gross, refunds, volunteerPending, productMap, foodMap, hourMap, orderCount: list.filter(s => (s.kind || 'sale') === 'sale').length };
 }
 function mergeReportData(a, b) {
@@ -1443,17 +1443,17 @@ function mergeReportData(a, b) {
     out.refunds += Number(src.refunds || 0);
     out.volunteerPending += Number(src.volunteerPending || 0);
     out.orderCount += Number(src.orderCount || 0);
-    Object.entries(src.totals || {}).forEach(([k,v]) => { out.totals[k] ||= 0; out.totals[k] += Number(v || 0); });
-    Object.entries(src.productMap || {}).forEach(([name,v]) => {
+    Object.entries(src.totals || {}).forEach(([k, v]) => { out.totals[k] ||= 0; out.totals[k] += Number(v || 0); });
+    Object.entries(src.productMap || {}).forEach(([name, v]) => {
       out.productMap[name] ||= { qty: 0, total: 0 };
       out.productMap[name].qty += Number(v.qty || 0);
       out.productMap[name].total += Number(v.total || 0);
     });
-    Object.entries(src.foodMap || {}).forEach(([name,v]) => {
+    Object.entries(src.foodMap || {}).forEach(([name, v]) => {
       out.foodMap[name] ||= { qty: 0 };
       out.foodMap[name].qty += Number(v.qty || 0);
     });
-    Object.entries(src.hourMap || {}).forEach(([name,v]) => {
+    Object.entries(src.hourMap || {}).forEach(([name, v]) => {
       out.hourMap[name] ||= { orders: 0, total: 0 };
       out.hourMap[name].orders += Number(v.orders || 0);
       out.hourMap[name].total += Number(v.total || 0);
@@ -1476,9 +1476,9 @@ function reportHtml() {
   const refunds = Number(data.refunds || 0);
   const volunteerPending = Number(data.volunteerPending || 0);
   const net = gross - refunds;
-  const productRows = Object.entries(data.productMap || {}).sort((a,b)=>a[0].localeCompare(b[0], 'fr')).map(([name,v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`).join('');
-  const foodRows = Object.entries(data.foodMap || {}).sort((a,b)=>a[0].localeCompare(b[0], 'fr')).map(([name,v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td></tr>`).join('');
-  const hourRows = Object.entries(data.hourMap || {}).sort((a,b)=>a[0].localeCompare(b[0], 'fr')).map(([hour,v]) => `<tr><td>${escapeHtml(hour)}</td><td>${v.orders}</td><td>${fmt(v.total)}</td></tr>`).join('');
+  const productRows = Object.entries(data.productMap || {}).sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([name, v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`).join('');
+  const foodRows = Object.entries(data.foodMap || {}).sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([name, v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td></tr>`).join('');
+  const hourRows = Object.entries(data.hourMap || {}).sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([hour, v]) => `<tr><td>${escapeHtml(hour)}</td><td>${v.orders}</td><td>${fmt(v.total)}</td></tr>`).join('');
   const volunteerRows = (config.volunteers || []).map(v => ({ v, amount: volunteerPendingAmount(v.id) })).filter(x => x.amount > 0).map(x => `<tr><td>${escapeHtml(x.v.name)}</td><td>${fmt(x.amount)}</td><td><button class="validate" data-pay-volunteer="${escapeHtml(x.v.id)}">Régler</button></td></tr>`).join('');
   return `
 
@@ -1500,7 +1500,7 @@ function reportHtml() {
       <span>${data.orderCount || 0}</span>
     </div>
   </div>
-  <div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${data.orderCount || 0}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k,v])=>`<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Statistiques horaires des commandes</h3><table class="data-table"><thead><tr><th>Heure</th><th>Commandes</th><th>Total</th></tr></thead><tbody>${hourRows || '<tr><td colspan="3">Aucune commande</td></tr>'}</tbody></table><h3>Tous les produits</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucun produit</td></tr>'}</tbody></table><h3>Tous les aliments</h3><table class="data-table"><thead><tr><th>Aliment</th><th>Qté utilisée</th></tr></thead><tbody>${foodRows || '<tr><td colspan="2">Aucun aliment</td></tr>'}</tbody></table><h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`;
+  <div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${data.orderCount || 0}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Statistiques horaires des commandes</h3><table class="data-table"><thead><tr><th>Heure</th><th>Commandes</th><th>Total</th></tr></thead><tbody>${hourRows || '<tr><td colspan="3">Aucune commande</td></tr>'}</tbody></table><h3>Tous les produits</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucun produit</td></tr>'}</tbody></table><h3>Tous les aliments</h3><table class="data-table"><thead><tr><th>Aliment</th><th>Qté utilisée</th></tr></thead><tbody>${foodRows || '<tr><td colspan="2">Aucun aliment</td></tr>'}</tbody></table><h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`;
 }
 function bindVolunteerPayButtons(root = document) {
   root.querySelectorAll('[data-pay-volunteer]').forEach(b => b.addEventListener('click', e => openVolunteerPayment(e.currentTarget.dataset.payVolunteer)));
@@ -1541,14 +1541,14 @@ function startNewEvent() {
 
   const name = prompt('Nom de la manifestation ?', 'Nouvelle manifestation');
   if (!name) return;
-currentEventId = 'event-' + Date.now();
-localStorage.setItem('caisse_event_id', currentEventId);
+  currentEventId = 'event-' + Date.now();
+  localStorage.setItem('caisse_event_id', currentEventId);
 
-config.currentEventId = currentEventId;
-config.eventName = name;
+  config.currentEventId = currentEventId;
+  config.eventName = name;
   console.log('Nouveau nom manifestation =', config.eventName);
-saveConfig();
- renderEventTitle();
+  saveConfig();
+  renderEventTitle();
   sales = [];
   localStorage.setItem('caisse_sales', JSON.stringify(sales));
 
@@ -1595,7 +1595,7 @@ async function renderSettingsReport() {
   sales = previousSales;
 }
 async function openOrders() {
- 
+
   alert('OPEN ORDERS');
   await loadSalesFromSupabase();
 
@@ -1875,14 +1875,14 @@ function initDeviceSetupDialog() {
       showMessage('Configuration incomplète', 'Indique un nom pour cet appareil.');
       return;
     }
-    
-if (!(await isDeviceCodeAvailable(deviceCode))) {
-    showMessage(
+
+    if (!(await isDeviceCodeAvailable(deviceCode))) {
+      showMessage(
         "Poste déjà utilisé",
         `Le poste ${deviceCode} est déjà utilisé par une autre caisse.`
-    );
-    return;
-}
+      );
+      return;
+    }
     saveDeviceConfig({
       deviceName,
       deviceCode,
@@ -1907,5 +1907,4 @@ renderCart();
 initSupabaseSync();
 initDeviceSetupDialog();
 
-
-document.addEventListener('DOMContentLoaded',()=>{const b=document.getElementById('btnCloseSettingsBottom'); if(b){b.addEventListener('click',()=>document.getElementById('settingsDialog')?.close());}});
+document.addEventListener('DOMContentLoaded', () => { const b = document.getElementById('btnCloseSettingsBottom'); if (b) { b.addEventListener('click', () => document.getElementById('settingsDialog')?.close()); } });

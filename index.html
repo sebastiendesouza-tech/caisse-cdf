@@ -1,5 +1,6 @@
 <!doctype html>
 <html lang="fr">
+
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -10,11 +11,14 @@
   <link rel="manifest" href="manifest.webmanifest" />
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+
   <header class="topbar no-print">
     <div>
-      <h1>Caisse by SDS <small>(iPad Chrome)</small> <span class="version-badge">v2026.13</span></h1>
+      <h1>Caisse by SDS 2<small>(iPad Chrome)</small> <span class="version-badge">v2026.13</span></h1>
       <div id="eventTitle" class="event-title">Comité des Fêtes-Moroges</div>
+      <div id="centralDashboard" style="display:none"></div>
     </div>
     <div class="top-actions">
       <button id="btnSettings" class="secondary">Paramètres</button>
@@ -110,7 +114,8 @@
         <button class="tab" data-tab="export">Export CSV</button>
       </div>
       <section id="tab-products" class="tab-panel active">
-        <p class="hint">Pour un produit composé ou un menu, choisis les viandes/accompagnements proposés, le nombre à choisir, et un supplément éventuel par aliment.</p>
+        <p class="hint">Pour un produit composé ou un menu, choisis les viandes/accompagnements proposés, le nombre à
+          choisir, et un supplément éventuel par aliment.</p>
         <div id="productEditor" class="editor-list"></div>
       </section>
       <section id="tab-foods" class="tab-panel">
@@ -125,9 +130,18 @@
         <label>Nom manifestation</label>
         <input id="setEventName" />
         <label>Préfixe iPad</label>
-        <select id="setPrefix"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+        <select id="setPrefix">
+          <option>A</option>
+          <option>B</option>
+          <option>C</option>
+          <option>D</option>
+        </select>
         <label>Couleur ticket</label>
-        <select id="setTicketColor"><option value="black">Noir</option><option value="blue">Bleu</option><option value="red">Rouge</option></select>
+        <select id="setTicketColor">
+          <option value="black">Noir</option>
+          <option value="blue">Bleu</option>
+          <option value="red">Rouge</option>
+        </select>
         <h3>Couleur des catégories</h3>
         <div id="categoryColorEditor" class="editor-list"></div>
       </section>
@@ -144,24 +158,25 @@
         <div id="settingsReportContent"></div>
       </section>
       <section id="tab-new-event" class="tab-panel">
-      <h3>Nouvelle manifestation</h3>
-    
-      <p class="hint">
-        Cette action crée une nouvelle manifestation, remet le numéro de ticket à A0001
-        et vide les ventes locales.
-      </p>
-    
-      <button id="btnNewEvent" class="danger">
-        🎉 Démarrer une nouvelle manifestation
-      </button>
-    </section>
+        <h3>Nouvelle manifestation</h3>
+
+        <p class="hint">
+          Cette action crée une nouvelle manifestation, remet le numéro de ticket à A0001
+          et vide les ventes locales.
+        </p>
+
+        <button id="btnNewEvent" class="danger">
+          🎉 Démarrer une nouvelle manifestation
+        </button>
+      </section>
       <section id="tab-export" class="tab-panel">
         <p class="hint">Clique sur l'onglet pour lancer directement l'export CSV.</p>
         <div class="export-status">L'export CSV se lance automatiquement.</div>
       </section>
       <div class="settings-actions">
         <button id="btnReset" class="danger">Vider les boutons produits</button>
-        <button id="btnCloseSettingsBottom" class="secondary">Fermer</button><button id="btnSaveSettings" class="validate">Enregistrer</button>
+        <button id="btnCloseSettingsBottom" class="secondary">Fermer</button><button id="btnSaveSettings"
+          class="validate">Enregistrer</button>
       </div>
     </div>
   </dialog>
@@ -192,7 +207,8 @@
         <h2>Remboursement rapide</h2>
         <button id="btnCloseQuickRefund" class="secondary">Fermer</button>
       </div>
-      <p class="hint">Pour une rupture de stock ou un retour simple : choisis directement le produit à rembourser, sans rechercher la commande d'origine.</p>
+      <p class="hint">Pour une rupture de stock ou un retour simple : choisis directement le produit à rembourser, sans
+        rechercher la commande d'origine.</p>
       <label>Filtrer les produits</label>
       <input id="quickRefundSearch" placeholder="Exemple : bière, assiette, glace..." />
       <div id="quickRefundLines" class="editor-list"></div>
@@ -210,7 +226,8 @@
         <h2 id="refundTitle">Remboursement</h2>
         <button id="btnCloseRefund" class="secondary">Fermer</button>
       </div>
-      <p class="hint">Choisis les quantités à rembourser. Une écriture négative sera ajoutée, la commande d'origine reste conservée.</p>
+      <p class="hint">Choisis les quantités à rembourser. Une écriture négative sera ajoutée, la commande d'origine
+        reste conservée.</p>
       <div id="refundLines" class="editor-list"></div>
       <p class="hint"><strong>Remboursement en espèces uniquement.</strong></p>
       <div id="refundTotal" class="refund-total">0,00 €</div>
@@ -242,7 +259,10 @@
       </div>
       <p>Total à régler : <strong id="volunteerPaySummary">0,00 €</strong></p>
       <label>Mode de paiement</label>
-      <select id="volunteerPayMethod"><option>Espèces</option><option>CB</option></select>
+      <select id="volunteerPayMethod">
+        <option>Espèces</option>
+        <option>CB</option>
+      </select>
       <div class="settings-actions">
         <button id="btnValidateVolunteerPayment" class="validate">Valider le règlement</button>
       </div>
@@ -251,43 +271,47 @@
 
   <section id="printArea" class="print-ticket"></section>
 
-<dialog id="deviceSetupDialog" class="no-print">
-  <div class="settings">
-    <div class="settings-head">
-      <h2>Configuration de l'appareil</h2>
+  <dialog id="deviceSetupDialog" class="no-print">
+    <div class="settings">
+      <div class="settings-head">
+        <h2>Configuration de l'appareil</h2>
+      </div>
+
+      <p class="hint">
+        Cette configuration est propre à cet appareil et ne sera pas synchronisée avec les autres caisses.
+      </p>
+
+      <label>Nom de l'appareil</label>
+      <input id="deviceName" placeholder="Exemple : PC Bar ou iPad Entrée">
+
+      <label>Poste de caisse</label>
+      <select id="deviceCode">
+        <option value="A">A - Caisse centrale</option>
+        <option value="B">B</option>
+        <option value="C">C</option>
+        <option value="D">D</option>
+      </select>
+
+      <label>Mode d'impression</label>
+      <select id="devicePrintMode">
+        <option value="central">Centralisée</option>
+        <option value="direct">Directe (secours)</option>
+        <option value="none">Aucune</option>
+      </select>
+
+      <div class="settings-actions">
+        <button id="btnSaveDeviceConfig" class="validate">
+          Enregistrer
+        </button>
+      </div>
     </div>
+  </dialog>
 
-    <p class="hint">
-      Cette configuration est propre à cet appareil et ne sera pas synchronisée avec les autres caisses.
-    </p>
-
-    <label>Nom de l'appareil</label>
-    <input id="deviceName" placeholder="Exemple : PC Bar ou iPad Entrée">
-
-    <label>Poste de caisse</label>
-    <select id="deviceCode">
-      <option value="A">A - Caisse centrale</option>
-      <option value="B">B</option>
-      <option value="C">C</option>
-      <option value="D">D</option>
-    </select>
-
-    <label>Mode d'impression</label>
-    <select id="devicePrintMode">
-      <option value="central">Centralisée</option>
-      <option value="direct">Directe (secours)</option>
-      <option value="none">Aucune</option>
-    </select>
-
-    <div class="settings-actions">
-      <button id="btnSaveDeviceConfig" class="validate">
-        Enregistrer
-      </button>
-    </div>
-  </div>
-</dialog>  
-  
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="app.js"></script>
+  <script src="ticket.js"></script>
+  <script src="print-service.js"></script>
+  <script src="dashboard.js"></script>
+  <script src="app.js?v=test1"></script>
 </body>
+
 </html>
