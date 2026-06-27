@@ -62,6 +62,32 @@ function refreshCentralDashboard() {
     checkConnectedDevices();
 
 }
+
+async function releaseOtherDevices() {
+    if (getDeviceCode() !== "A") return;
+
+    if (!confirm("Libérer les caisses B, C et D ?")) return;
+
+    const { error } = await supabaseClient
+        .from("devices")
+        .update({
+            current_device: null,
+            device_status: "free",
+            last_seen: null
+        })
+        .neq("device_code", "A");
+
+    if (error) {
+        console.error(error);
+        showMessage("Erreur", "Impossible de libérer les autres caisses.");
+        return;
+    }
+
+    await checkConnectedDevices();
+
+    showMessage("Caisses libérées", "Les caisses B, C et D sont disponibles.");
+}
+
 // Fonctions privées
 async function checkPendingPrints() {
     if (!supabaseClient) return;
@@ -109,7 +135,11 @@ async function checkConnectedDevices() {
             "<strong>📱 Caisses</strong><br><br>" +
             data.map(device =>
                 `${device.device_status === "busy" ? "🟢" : "⚪"} ${device.device_code} - ${device.device_name || "Libre"}`
-            ).join("<br>");
+            ).join("<br>") +
+            `<br><br>
+            <button type="button" class="secondary" onclick="releaseOtherDevices()">
+            🔓 Libérer les autres caisses
+            </button>`;
     }
 }
 // Utilitaires
