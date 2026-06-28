@@ -1913,7 +1913,8 @@ function mergeReportData(a, b) {
   return out;
 }
 function visibleReportData() {
-  return mergeReportData(reportArchive, computeReportData());
+  const activeSales = sales.filter(s => s.cancelled !== true);
+  return mergeReportData(reportArchive, computeReportData(activeSales));
 }
 function paymentTotals() {
   return visibleReportData().totals;
@@ -2094,19 +2095,154 @@ function renderEventTitle() {
 }
 
 function ordersHtml() {
-  return sales.map((s, idx) => {
-    const isRefund = s.kind === 'refund';
-    const isVolunteer = s.kind === 'volunteer';
-    const items = (s.items || []).map(i => `${i.qty} x ${escapeHtml(i.name)} (${fmt(i.qty * i.price)})`).join('<br>');
-    const volunteerToggle = isVolunteer ? `<button class="secondary" data-toggle-volunteer-order="${idx}">${s.settled === false ? 'Marquer réglé' : 'Marquer à régler'}</button>` : '';
-    const refundInfo = isVolunteer ? `<div class="hint">Bénévole : ${escapeHtml(s.volunteerName || '')} - ${s.settled === false ? 'à régler' : 'réglé'}</div>` : (!isRefund ? `<div class="hint">Déjà remboursé : ${fmt(refundAmountForSale(s.orderNumber))} / Net : ${fmt(netSaleTotal(s))}</div>` : `<div class="hint">Remboursement en espèces</div>`);
-    const btn = (!isRefund && !isVolunteer && netSaleTotal(s) > 0) ? `<button class="danger" data-refund-sale="${idx}">Rembourser</button>` : volunteerToggle;
-    return `<div class="order-card ${isRefund ? 'refund-card' : ''}"><div><strong>${isRefund ? 'Remboursement' : 'Commande'} n° ${escapeHtml(s.orderNumber)}</strong><span>${formatDate(s.date)} - ${escapeHtml(s.hourLabel || orderHourLabel(s))}</span></div><div>${items}</div><div class="order-bottom"><b>${fmt(s.total)}</b><span>${escapeHtml(s.paymentMethod || '')}</span>${btn}</div>${refundInfo}</div>`;
-  }).reverse().join('') || '<p>Aucune commande enregistrée.</p>';
+  return sales
+    .map((s, idx) => ({ s, idx }))
+    .reverse()
+    .map(({ s, idx }) => {
+      const isRefund = s.kind === 'refund';
+      const isVolunteer = s.kind === 'volunteer';
+      const isCancelled = s.cancelled === true;
+
+      const items = (s.items || [])
+        .map(i => `${i.qty} x ${escapeHtml(i.name)} (${fmt(i.qty * i.price)})`)
+        .join('<br>');
+
+      const volunteerToggle = isVolunteer
+        ? `<button class="secondary" data-toggle-volunteer-order="${idx}">
+            ${s.settled === false ? 'Marquer réglé' : 'Marquer à régler'}
+          </button>`
+        : '';
+
+      const refundInfo = isCancelled
+        ? `<div class="hint">Commande annulée${s.cancelReason ? ' - ' + escapeHtml(s.cancelReason) : ''}</div>`
+        : isVolunteer
+          ? `<div class="hint">Bénévole : ${escapeHtml(s.volunteerName || '')} - ${s.settled === false ? 'à régler' : 'réglé'}</div>`
+          : isRefund
+            ? `<div class="hint">Remboursement en espèces</div>`
+            : `<div class="hint">Déjà remboursé : ${fmt(refundAmountForSale(s.orderNumber))} / Net : ${fmt(netSaleTotal(s))}</div>`;
+
+      const btn = (!isRefund && !isVolunteer && !isCancelled)
+        ? `<button class="danger" data-cancel-order="${escapeHtml(s.orderNumber)}">Annuler</button>`
+        : volunteerToggle;
+
+      return `
+        <div class="order-card ${isRefund || isCancelled ? 'refund-card' : ''}">
+          <div>
+            <strong>${isRefund ? 'Remboursement' : isCancelled ? 'Commande annulée' : 'Commande'} n° ${escapeHtml(s.orderNumber)}</strong>
+            <span>${formatDate(s.date)} - ${escapeHtml(s.hourLabel || orderHourLabel(s))}</span>
+          </div>
+
+          <div>${items}</div>
+
+          <div class="order-bottom">
+            <b>${fmt(s.total)}</b>
+            <span>${escapeHtml(s.paymentMethod || '')}</span>
+            ${btn}
+          </div>
+
+          ${refundInfo}
+        </div>
+      `;
+    })
+    .join('') || '<p>Aucune commande enregistrée.</p>';
 }
+
 function bindRefundButtons(root = document) {
-  root.querySelectorAll('[data-refund-sale]').forEach(b => b.addEventListener('click', e => openRefund(Number(e.currentTarget.dataset.refundSale))));
+  root.querySelectorAll('[data-refund-sale]').forEach(b =>
+    b.addEventListener('click', e => openRefund(Number(e.currentTarget.dataset.refundSale)))
+  );
+
+  root.querySelectorAll('[data-cancel-order]').forEach(b =>
+    b.addEventListener('click', e => openCancelSale(e.currentTarget.dataset.cancelOrder))
+  );
 }
+function restoreStockFromSale(sale) {
+  if (!sale || !Array.isArray(sale.items)) return;
+
+  sale.items.forEach(item => {
+    if (Number(item.price || 0) < 0) return;
+
+    const productId = item.id;
+    const qty = Number(item.qty || 0);
+
+    restoreStock(productId, qty);
+
+    (item.selectedProducts || []).forEach(productId => {
+      restoreStock(productId, qty);
+    });
+
+    (item.selectedFoods || []).forEach(selectedFood => {
+      const food = config.baseFoods.find(f => f.id === selectedFood.foodId);
+      if (!food || !isTracked(food.stock)) return;
+
+      food.stock =
+        Number(food.stock || 0) +
+        qty * Number(selectedFood.qty || 1);
+    });
+  });
+
+  saveConfig();
+  renderProducts();
+  renderSettings();
+}
+
+async function openCancelSale(orderNumber) {
+
+  const sale = sales.find(s => s.orderNumber === orderNumber);
+
+  if (!sale) {
+    showMessage('Commande introuvable', `Impossible de retrouver la commande n°${orderNumber}.`);
+    return;
+  }
+
+  const reason = prompt(
+    `Motif d'annulation de la commande n°${sale.orderNumber} ?`,
+    'Erreur de saisie'
+  );
+
+  if (reason === null) return;
+
+  sale.cancelled = true;
+  sale.cancelDate = new Date().toISOString();
+  sale.cancelReason = reason.trim() || 'Annulation';
+  console.log('Annulation - vente trouvée :', sale);
+  console.log('Annulation - items :', sale.items);
+
+  restoreStockFromSale(sale);
+  saveSales();
+
+  if (supabaseClient) {
+    const { error } = await supabaseClient
+      .from('sales')
+      .update({
+        cancelled: true,
+        cancel_date: sale.cancelDate,
+        cancel_reason: sale.cancelReason,
+        sale_data: sale
+      })
+      .eq('order_number', sale.orderNumber)
+      .eq('event_id', currentEventId);
+
+    if (error) {
+      console.error('Erreur annulation commande Supabase', error);
+      showMessage('Erreur', 'La commande a été annulée localement, mais pas dans Supabase.');
+      return;
+    }
+  }
+
+  renderSettingsOrders();
+  renderSettingsReport();
+
+  if (typeof refreshCentralDashboard === 'function') {
+    refreshCentralDashboard();
+  }
+
+  showMessage(
+    'Commande annulée',
+    `La commande n°${sale.orderNumber} a été annulée.`
+  );
+}
+
 async function renderSettingsReport() {
   const el = document.getElementById('settingsReportContent');
   if (!el) return;
@@ -2455,6 +2591,9 @@ function handleSettingsReset() {
 document.getElementById('btnCloseChoice').addEventListener('click', () => document.getElementById('choiceDialog').close());
 document.getElementById('btnAddChoiceProduct').addEventListener('click', addChoiceProduct);
 document.getElementById('btnCloseSettings').addEventListener('click', () => document.getElementById('settingsDialog').close());
+document.getElementById('btnCloseSettingsBottom')?.addEventListener('click', () => {
+  document.getElementById('settingsDialog')?.close();
+});
 document.getElementById('btnSaveSettings').addEventListener('click', saveSettings);
 document.getElementById('btnAddFood').addEventListener('click', () => { draftConfig.baseFoods.push({ id: uid('food'), name: 'Nouvel aliment', category: 'Viande', stock: '' }); renderSettings(); });
 document.getElementById('btnAddVolunteer').addEventListener('click', () => { draftConfig.volunteers ||= []; draftConfig.volunteers.push({ id: uid('vol'), name: 'Nouveau bénévole', active: true }); renderVolunteerEditor(); });

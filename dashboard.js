@@ -336,7 +336,7 @@ async function refreshDashboardSales() {
 
     const { data, error } = await supabaseClient
         .from("sales")
-        .select("payment_method,total,cash_amount,card_amount,sale_data")
+        .select("payment_method,total,cash_amount,card_amount,sale_data,cancelled")
         .eq("event_id", currentEventId);
 
     if (error) {
@@ -350,6 +350,8 @@ async function refreshDashboardSales() {
     let total = 0;
 
     (data || []).forEach(sale => {
+        if (sale.cancelled) return;
+
         total += Number(sale.total || 0);
 
         cash += Number(
@@ -383,7 +385,7 @@ async function refreshDashboardSales() {
 
         <div class="dashboard-money-line">
             <span>🎟 Tickets</span>
-            <strong>${(data || []).length}</strong>
+            <strong>${(data || []).filter(s => !s.cancelled).length}</strong>
         </div>
     `;
 }
@@ -398,7 +400,7 @@ async function refreshDashboardStats() {
 
     const { data, error } = await supabaseClient
         .from("sales")
-        .select("order_number,total,created_at")
+        .select("order_number,total,created_at,cancelled")
         .eq("event_id", currentEventId)
         .order("created_at", { ascending: false });
 
@@ -408,7 +410,7 @@ async function refreshDashboardStats() {
         return;
     }
 
-    const sales = data || [];
+    const sales = (data || []).filter(s => !s.cancelled);
     const count = sales.length;
     const total = sales.reduce((sum, sale) => sum + Number(sale.total || 0), 0);
     const average = count ? total / count : 0;
