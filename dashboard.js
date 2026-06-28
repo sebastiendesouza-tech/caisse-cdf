@@ -5,58 +5,26 @@
 let selectedPrinterName = localStorage.getItem("sds_selected_printer") || "";
 
 // -----------------------------------------------------
-// Vues Caisse / Tableau de bord
+// Vues Caisse / En direct
 // -----------------------------------------------------
 
 function showCashierView() {
     const cashierView = document.getElementById("cashierView");
     const dashboardView = document.getElementById("dashboardView");
-    const btnCashier = document.getElementById("btnCashierView");
-    const btnDashboard = document.getElementById("btnDashboardView");
 
     if (cashierView) cashierView.style.display = "grid";
     if (dashboardView) dashboardView.style.display = "none";
-
-    if (btnCashier) btnCashier.classList.add("active");
-    if (btnDashboard) btnDashboard.classList.remove("active");
 }
 
 function showDashboardView() {
-    if (getDeviceCode() !== "A") {
-        showCashierView();
-        return;
-    }
-
     const cashierView = document.getElementById("cashierView");
     const dashboardView = document.getElementById("dashboardView");
-    const btnCashier = document.getElementById("btnCashierView");
-    const btnDashboard = document.getElementById("btnDashboardView");
 
     if (cashierView) cashierView.style.display = "none";
     if (dashboardView) dashboardView.style.display = "block";
 
-    if (btnCashier) btnCashier.classList.remove("active");
-    if (btnDashboard) btnDashboard.classList.add("active");
-
     updateCentralDashboard();
     refreshCentralDashboard();
-}
-
-function initDashboardViewSwitcher() {
-    const btnCashier = document.getElementById("btnCashierView");
-    const btnDashboard = document.getElementById("btnDashboardView");
-
-    if (getDeviceCode() === "A") {
-        if (btnCashier) btnCashier.style.display = "inline-block";
-        if (btnDashboard) btnDashboard.style.display = "inline-block";
-    } else {
-        if (btnCashier) btnCashier.style.display = "none";
-        if (btnDashboard) btnDashboard.style.display = "none";
-        showCashierView();
-    }
-
-    if (btnCashier) btnCashier.onclick = showCashierView;
-    if (btnDashboard) btnDashboard.onclick = showDashboardView;
 }
 
 // -----------------------------------------------------
@@ -65,28 +33,27 @@ function initDashboardViewSwitcher() {
 
 function updateCentralDashboard() {
     const panel = document.getElementById("centralDashboard");
-
     if (!panel) return;
-
-    if (getDeviceCode() !== "A") {
-        panel.style.display = "none";
-        panel.innerHTML = "";
-        return;
-    }
 
     panel.style.display = "block";
 
     panel.innerHTML = `
-        <div class="dashboard-grid">
+        <div class="dashboard-header">
+            <button id="btnDashboardBack" type="button" class="secondary">
+                ← Retour à la caisse
+            </button>
+            <h1>📊 En direct</h1>
+        </div>
 
+        <div class="dashboard-grid">
             <section class="dashboard-card">
                 <h2>Connexions</h2>
-                <div id="dashboardConnections"></div>
+                <div id="dashboardConnections">Chargement...</div>
             </section>
 
             <section class="dashboard-card">
                 <h2>Impression</h2>
-                <div id="dashboardTickets"></div>
+                <div id="dashboardTickets">Chargement...</div>
                 <div id="dashboardPrinterStatus"></div>
                 <div id="dashboardPrinterConfig"></div>
             </section>
@@ -100,9 +67,10 @@ function updateCentralDashboard() {
                 <h2>📈 Ventes</h2>
                 <div id="dashboardStats">Chargement...</div>
             </section>
-
         </div>
     `;
+
+    document.getElementById("btnDashboardBack")?.addEventListener("click", showCashierView);
 }
 
 // -----------------------------------------------------
@@ -110,8 +78,6 @@ function updateCentralDashboard() {
 // -----------------------------------------------------
 
 async function refreshCentralDashboard() {
-    if (getDeviceCode() !== "A") return;
-
     await refreshDashboardConnections();
     await checkPendingPrints();
     updateDashboardPrinterConfig();
@@ -162,7 +128,7 @@ async function refreshDashboardConnections() {
     el.innerHTML = `
         <div class="dashboard-compact-line">
             <span>Supabase</span>
-            <strong>🟢 Connecté</strong>
+            <strong>${supabaseClient ? "🟢 Connecté" : "🔴 Non connecté"}</strong>
         </div>
 
         <div class="dashboard-compact-line">
@@ -187,7 +153,6 @@ async function refreshDashboardConnections() {
 
 function updateDashboardPrinter(message) {
     const el = document.getElementById("dashboardPrinterStatus");
-
     if (!el) return;
 
     el.innerHTML = `
@@ -213,14 +178,13 @@ async function checkPendingPrints() {
     }
 
     const ticketsEl = document.getElementById("dashboardTickets");
-
     if (!ticketsEl) return;
 
     const count = data ? data.length : 0;
 
     ticketsEl.innerHTML = `
         <div class="dashboard-compact-line">
-            <span>Tickets</span>
+            <span>Tickets à imprimer</span>
             <strong>🎟 ${count}</strong>
         </div>
     `;
@@ -228,7 +192,6 @@ async function checkPendingPrints() {
 
 function updateDashboardPrinterConfig() {
     const el = document.getElementById("dashboardPrinterConfig");
-
     if (!el) return;
 
     if (document.getElementById("printerSelect")) return;
@@ -240,6 +203,7 @@ function setSelectedPrinter(name) {
     selectedPrinterName = name || "";
     localStorage.setItem("sds_selected_printer", selectedPrinterName);
 }
+
 function setDashboardPrintTicketsEnabled(checked) {
     config.printTicketsEnabled = checked !== false;
     saveConfig();
@@ -247,16 +211,13 @@ function setDashboardPrintTicketsEnabled(checked) {
 
 async function refreshPrinterList() {
     const el = document.getElementById("dashboardPrinterConfig");
-
     if (!el) return;
 
     try {
         const response = await fetch("http://127.0.0.1:17890/printers");
         const data = await response.json();
 
-        if (!data.ok) {
-            throw new Error(data.error);
-        }
+        if (!data.ok) throw new Error(data.error);
 
         if (!selectedPrinterName && data.printers.length > 0) {
             setSelectedPrinter(data.printers[0].name);
@@ -265,12 +226,7 @@ async function refreshPrinterList() {
         const options = data.printers
             .map(printer => {
                 const selected = printer.name === selectedPrinterName ? "selected" : "";
-
-                return `
-                    <option value="${printer.name}" ${selected}>
-                        ${printer.name}
-                    </option>
-                `;
+                return `<option value="${printer.name}" ${selected}>${printer.name}</option>`;
             })
             .join("");
 
@@ -303,21 +259,13 @@ async function refreshPrinterList() {
             </div>
         `;
 
-        const select = document.getElementById("printerSelect");
+        document.getElementById("printerSelect")?.addEventListener("change", e => {
+            setSelectedPrinter(e.currentTarget.value);
+        });
 
-        if (select) {
-            select.addEventListener("change", () => {
-                setSelectedPrinter(select.value);
-            });
-        }
-
-        const printTicketsCheckbox = document.getElementById("dashboardPrintTicketsEnabled");
-
-        if (printTicketsCheckbox) {
-            printTicketsCheckbox.addEventListener("change", () => {
-                setDashboardPrintTicketsEnabled(printTicketsCheckbox.checked);
-            });
-        }
+        document.getElementById("dashboardPrintTicketsEnabled")?.addEventListener("change", e => {
+            setDashboardPrintTicketsEnabled(e.currentTarget.checked);
+        });
 
     } catch (e) {
         console.error("Erreur refreshPrinterList :", e);
@@ -342,19 +290,13 @@ async function refreshPrinterList() {
             </div>
         `;
 
-        const printTicketsCheckbox = document.getElementById("dashboardPrintTicketsEnabled");
-
-        if (printTicketsCheckbox) {
-            printTicketsCheckbox.addEventListener("change", () => {
-                setDashboardPrintTicketsEnabled(printTicketsCheckbox.checked);
-            });
-        }
+        document.getElementById("dashboardPrintTicketsEnabled")?.addEventListener("change", e => {
+            setDashboardPrintTicketsEnabled(e.currentTarget.checked);
+        });
     }
 }
 
 async function printTestPage() {
-    console.log("Bouton Test impression cliqué");
-
     const printer =
         document.getElementById("printerSelect")?.value ||
         selectedPrinterName;
@@ -365,29 +307,19 @@ async function printTestPage() {
     }
 
     try {
-        const response = await fetch(
-            "http://127.0.0.1:17890/print-test",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    printer
-                })
-            }
-        );
+        const response = await fetch("http://127.0.0.1:17890/print-test", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ printer })
+        });
 
         const data = await response.json();
 
-        console.log("Réponse /print-test :", data);
-
-        if (!data.ok) {
-            throw new Error(data.error);
-        }
+        if (!data.ok) throw new Error(data.error);
 
         alert("Ticket de test envoyé.");
-
     } catch (e) {
         console.error(e);
         alert("Erreur d'impression : " + e.message);
@@ -400,12 +332,11 @@ async function printTestPage() {
 
 async function refreshDashboardSales() {
     const el = document.getElementById("dashboardSales");
-
     if (!el || !supabaseClient) return;
 
     const { data, error } = await supabaseClient
         .from("sales")
-        .select("payment_method,total")
+        .select("payment_method,total,cash_amount,card_amount,sale_data")
         .eq("event_id", currentEventId);
 
     if (error) {
@@ -419,14 +350,19 @@ async function refreshDashboardSales() {
     let total = 0;
 
     (data || []).forEach(sale => {
-        const amount = Number(sale.total || 0);
-        total += amount;
+        total += Number(sale.total || 0);
 
-        if (sale.payment_method === "CB") {
-            card += amount;
-        } else if (sale.payment_method === "Espèces") {
-            cash += amount;
-        }
+        cash += Number(
+            sale.cash_amount ??
+            sale.sale_data?.cashAmount ??
+            0
+        );
+
+        card += Number(
+            sale.card_amount ??
+            sale.sale_data?.cardAmount ??
+            0
+        );
     });
 
     el.innerHTML = `
@@ -458,7 +394,6 @@ async function refreshDashboardSales() {
 
 async function refreshDashboardStats() {
     const el = document.getElementById("dashboardStats");
-
     if (!el || !supabaseClient) return;
 
     const { data, error } = await supabaseClient
@@ -532,11 +467,3 @@ async function releaseOtherDevices() {
         "Seules les caisses sans activité depuis plus de 2 minutes ont été libérées."
     );
 }
-
-// -----------------------------------------------------
-// Initialisation
-// -----------------------------------------------------
-
-document.addEventListener("DOMContentLoaded", () => {
-    initDashboardViewSwitcher();
-});

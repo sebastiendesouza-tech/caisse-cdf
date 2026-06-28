@@ -22,9 +22,7 @@
     <div id="eventTitle" class="event-title">Comité des Fêtes-Moroges</div>
 
     <div class="top-actions">
-      <button id="btnCashierView" class="secondary view-toggle active" style="display:none">Caisse</button>
-      <button id="btnDashboardView" class="secondary view-toggle" style="display:none">Tableau de bord</button>
-      <button id="btnSettings" class="secondary">Paramètres</button>
+      <button id="btnSettings" class="secondary">🗂️ Gestion</button>
       <button id="btnToggleDisplayMode" class="secondary" type="button">
         ▣ Compact
       </button>
@@ -128,7 +126,32 @@
       </div>
     </div>
   </dialog>
+  <dialog id="gestionDialog" class="settings-dialog">
+    <div class="settings-header">
+      <div class="settings-header">
+        <h2>🗂️ Gestion</h2>
 
+        <button id="btnCloseGestion" class="secondary" type="button">
+          ✕ Fermer
+        </button>
+      </div>
+    </div>
+
+    <div class="gestion-menu">
+
+      <div class="gestion-section-title">Exploitation</div>
+
+      <button id="btnGestionLive" type="button">📊 En direct</button>
+      <button id="btnGestionStocks" type="button">📦 Stocks</button>
+      <button id="btnGestionVolunteers" type="button">👥 Bénévoles</button>
+      <button id="btnGestionOrders" type="button">🧾 Commandes</button>
+
+      <div class="gestion-section-title">Administration</div>
+
+      <button id="btnGestionAdmin" type="button">⚙️ Administration</button>
+
+    </div>
+  </dialog>
   <dialog id="settingsDialog" class="no-print">
     <div class="settings">
       <div class="settings-head">

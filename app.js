@@ -1518,8 +1518,16 @@ function renderSettingsOrders() {
     sales = previousSales;
   });
 }
-function openSettings() { draftConfig = clone(config); renderSettings(); updateSettingsResetButton(); document.getElementById('settingsDialog').showModal(); }
-function renderSettings() { renderProductEditor(); renderFoodEditor(); renderStockEditor(); renderGeneralEditor(); renderVolunteerEditor(); renderSettingsOrders(); renderSettingsReport(); }
+let settingsMode = "admin";
+
+function openSettings(mode = "admin") { settingsMode = mode; draftConfig = clone(config); renderSettings(); updateSettingsResetButton(); document.getElementById('settingsDialog').showModal(); }
+function renderSettings() {
+  renderProductEditor(); renderFoodEditor(); renderStockEditor(); renderGeneralEditor(); renderVolunteerEditor(); renderSettingsOrders(); renderSettingsReport(); const tabs = document.querySelector('.settings-tabs');
+
+  if (tabs) {
+    tabs.style.display = settingsMode === "cashier" ? "none" : "";
+  }
+}
 function renderProductEditor() {
   const el = document.getElementById('productEditor');
   const zones = ['Boissons', 'Restauration', 'Consignes'];
@@ -1848,9 +1856,11 @@ function computeReportData(list = salesForReport()) {
   list.forEach(s => {
     const kind = s.kind || 'sale';
     if (kind !== 'volunteer') {
-      const method = s.paymentMethod || 'Inconnu';
-      totals[method] ||= 0;
-      totals[method] += Number(s.total || 0);
+      totals['Espèces'] ||= 0;
+      totals['CB'] ||= 0;
+
+      totals['Espèces'] += Number(s.cashAmount || 0);
+      totals['CB'] += Number(s.cardAmount || 0);
     }
     if (kind === 'sale' || kind === 'volunteer') {
       const h = s.hourLabel || orderHourLabel(s) || 'Heure inconnue';
@@ -1915,31 +1925,112 @@ function reportHtml() {
   const refunds = Number(data.refunds || 0);
   const volunteerPending = Number(data.volunteerPending || 0);
   const net = gross - refunds;
-  const productRows = Object.entries(data.productMap || {}).sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([name, v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`).join('');
-  const foodRows = Object.entries(data.foodMap || {}).sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([name, v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td></tr>`).join('');
-  const hourRows = Object.entries(data.hourMap || {}).sort((a, b) => a[0].localeCompare(b[0], 'fr')).map(([hour, v]) => `<tr><td>${escapeHtml(hour)}</td><td>${v.orders}</td><td>${fmt(v.total)}</td></tr>`).join('');
-  const volunteerRows = (config.volunteers || []).map(v => ({ v, amount: volunteerPendingAmount(v.id) })).filter(x => x.amount > 0).map(x => `<tr><td>${escapeHtml(x.v.name)}</td><td>${fmt(x.amount)}</td><td><button class="validate" data-pay-volunteer="${escapeHtml(x.v.id)}">Régler</button></td></tr>`).join('');
-  return `
 
-  <div class="dashboard-cards">
-    <div class="dashboard-card">
-      <strong>💶 Chiffre d'affaires</strong>
+  const productRows = Object.entries(data.productMap || {})
+    .sort((a, b) => a[0].localeCompare(b[0], 'fr'))
+    .map(([name, v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td><td>${fmt(v.total)}</td></tr>`)
+    .join('');
+
+  const foodRows = Object.entries(data.foodMap || {})
+    .sort((a, b) => a[0].localeCompare(b[0], 'fr'))
+    .map(([name, v]) => `<tr><td>${escapeHtml(name)}</td><td>${v.qty}</td></tr>`)
+    .join('');
+
+  const hourRows = Object.entries(data.hourMap || {})
+    .sort((a, b) => a[0].localeCompare(b[0], 'fr'))
+    .map(([hour, v]) => `<tr><td>${escapeHtml(hour)}</td><td>${v.orders}</td><td>${fmt(v.total)}</td></tr>`)
+    .join('');
+
+  const volunteerRows = (config.volunteers || [])
+    .map(v => ({ v, amount: volunteerPendingAmount(v.id) }))
+    .filter(x => x.amount > 0)
+    .map(x => `<tr><td>${escapeHtml(x.v.name)}</td><td>${fmt(x.amount)}</td><td><button class="validate" data-pay-volunteer="${escapeHtml(x.v.id)}">Régler</button></td></tr>`)
+    .join('');
+
+  const paymentRows = [
+    ['Espèces', totals['Espèces'] || 0],
+    ['CB', totals['CB'] || 0]
+  ].map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('');
+
+  return `
+    <div class="dashboard-cards">
+      <div class="dashboard-card">
+        <strong>💶 Chiffre d'affaires</strong>
+        <span>${fmt(net)}</span>
+      </div>
+      <div class="dashboard-card">
+        <strong>💳 CB</strong>
+        <span>${fmt(totals['CB'] || 0)}</span>
+      </div>
+      <div class="dashboard-card">
+        <strong>💵 Espèces</strong>
+        <span>${fmt(totals['Espèces'] || 0)}</span>
+      </div>
+      <div class="dashboard-card">
+        <strong>🧾 Tickets</strong>
+        <span>${data.orderCount || 0}</span>
+      </div>
+    </div>
+
+    <div>
+      <strong>Ventes brutes</strong>
+      <span>${fmt(gross)}</span>
+    </div>
+
+    <div>
+      <strong>Remboursements</strong>
+      <span>${fmt(refunds)}</span>
+    </div>
+
+    <div>
+      <strong>Total net encaissé</strong>
       <span>${fmt(net)}</span>
     </div>
-    <div class="dashboard-card">
-      <strong>💳 CB</strong>
-      <span>${fmt(totals['CB'] || 0)}</span>
+
+    <div>
+      <strong>Bénévoles à régler</strong>
+      <span>${fmt(volunteerPending)}</span>
     </div>
-    <div class="dashboard-card">
-      <strong>💵 Espèces</strong>
-      <span>${fmt(totals['Espèces'] || 0)}</span>
-    </div>
-    <div class="dashboard-card">
-      <strong>🧾 Tickets</strong>
+
+    <div>
+      <strong>Commandes</strong>
       <span>${data.orderCount || 0}</span>
     </div>
-  </div>
-  <div><strong>Ventes brutes</strong><span>${fmt(gross)}</span></div><div><strong>Remboursements</strong><span>${fmt(refunds)}</span></div><div><strong>Total net encaissé</strong><span>${fmt(net)}</span></div><div><strong>Bénévoles à régler</strong><span>${fmt(volunteerPending)}</span></div><div><strong>Commandes</strong><span>${data.orderCount || 0}</span></div></div><h3>Par paiement</h3><table class="data-table"><tbody>${Object.entries(totals).map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${fmt(v)}</td></tr>`).join('')}</tbody></table><h3>Statistiques horaires des commandes</h3><table class="data-table"><thead><tr><th>Heure</th><th>Commandes</th><th>Total</th></tr></thead><tbody>${hourRows || '<tr><td colspan="3">Aucune commande</td></tr>'}</tbody></table><h3>Tous les produits</h3><table class="data-table"><thead><tr><th>Produit</th><th>Qté</th><th>Total</th></tr></thead><tbody>${productRows || '<tr><td colspan="3">Aucun produit</td></tr>'}</tbody></table><h3>Tous les aliments</h3><table class="data-table"><thead><tr><th>Aliment</th><th>Qté utilisée</th></tr></thead><tbody>${foodRows || '<tr><td colspan="2">Aucun aliment</td></tr>'}</tbody></table><h3>Bénévoles à régler</h3><table class="data-table"><tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody></table>`;
+
+    <h3>Par paiement</h3>
+    <table class="data-table">
+      <tbody>${paymentRows}</tbody>
+    </table>
+
+    <h3>Statistiques horaires des commandes</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>Heure</th><th>Commandes</th><th>Total</th></tr>
+      </thead>
+      <tbody>${hourRows || '<tr><td colspan="3">Aucune commande</td></tr>'}</tbody>
+    </table>
+
+    <h3>Tous les produits</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>Produit</th><th>Qté</th><th>Total</th></tr>
+      </thead>
+      <tbody>${productRows || '<tr><td colspan="3">Aucun produit</td></tr>'}</tbody>
+    </table>
+
+    <h3>Tous les aliments</h3>
+    <table class="data-table">
+      <thead>
+        <tr><th>Aliment</th><th>Qté utilisée</th></tr>
+      </thead>
+      <tbody>${foodRows || '<tr><td colspan="2">Aucun aliment</td></tr>'}</tbody>
+    </table>
+
+    <h3>Bénévoles à régler</h3>
+    <table class="data-table">
+      <tbody>${volunteerRows || '<tr><td>Aucun montant en attente</td></tr>'}</tbody>
+    </table>
+  `;
 }
 function bindVolunteerPayButtons(root = document) {
   root.querySelectorAll('[data-pay-volunteer]').forEach(b => b.addEventListener('click', e => openVolunteerPayment(e.currentTarget.dataset.payVolunteer)));
@@ -2149,7 +2240,42 @@ document.getElementById('btnCloseOrders').addEventListener('click', () => docume
 document.getElementById('btnCloseReport').addEventListener('click', () => document.getElementById('reportDialog').close());
 document.getElementById('btnCloseRefund').addEventListener('click', () => document.getElementById('refundDialog').close());
 document.getElementById('btnValidateRefund').addEventListener('click', validateRefund);
-document.getElementById('btnSettings').addEventListener('click', openSettings);
+document.getElementById('btnSettings').addEventListener('click', () => {
+  document.getElementById('gestionDialog')?.showModal();
+});
+
+document.getElementById('btnCloseGestion')?.addEventListener('click', () => {
+  document.getElementById('gestionDialog')?.close();
+});
+document.getElementById('btnGestionLive')?.addEventListener('click', () => {
+  document.getElementById('gestionDialog')?.close();
+  showDashboardView();
+});
+document.getElementById('btnGestionStocks')?.addEventListener('click', () => {
+  document.getElementById('gestionDialog')?.close();
+  openSettings("cashier");
+  showSettingsTab('stocks');
+});
+
+document.getElementById('btnGestionVolunteers')?.addEventListener('click', () => {
+  document.getElementById('gestionDialog')?.close();
+  openSettings("cashier");
+  showSettingsTab('volunteers');
+});
+
+document.getElementById('btnGestionOrders')?.addEventListener('click', () => {
+  document.getElementById('gestionDialog')?.close();
+  openSettings("cashier");
+  showSettingsTab('orders');
+});
+
+document.getElementById('btnGestionAdmin')?.addEventListener('click', () => {
+  document.getElementById('gestionDialog')?.close();
+  openSettings();
+  showSettingsTab('products');
+});
+
+
 
 document.addEventListener('click', e => {
   const btn = e.target.closest('[data-count-delta]');
@@ -2173,6 +2299,25 @@ document.addEventListener('click', e => {
 function activeSettingsTab() {
   return document.querySelector('.settings-tabs .tab.active')?.dataset.tab || 'products';
 }
+
+function showSettingsTab(tabName) {
+  document.querySelectorAll('.settings-tabs .tab, .tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.tab === tabName);
+  });
+
+  document.querySelectorAll('.tab-panel').forEach(panel => {
+    panel.classList.remove('active');
+  });
+
+  document.getElementById('tab-' + tabName)?.classList.add('active');
+
+  if (tabName === 'orders') renderSettingsOrders();
+  if (tabName === 'report') renderSettingsReport();
+  if (tabName === 'export') exportCsv();
+
+  updateSettingsResetButton();
+}
+
 function updateSettingsResetButton() {
   const btn = document.getElementById('btnReset');
   if (!btn) return;

@@ -2264,7 +2264,62 @@ body.compact-mode.show-payment .app {
 body.compact-mode.show-payment .payment-zone {
   display: flex;
 }
+
 .active-payment-field {
   outline: 3px solid #2563eb;
   outline-offset: 2px;
+}
+
+.gestion-menu {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+}
+
+.gestion-section-title {
+  margin: 12px 0 8px;
+  padding-top: 8px;
+  border-top: 1px solid #ddd;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+}
+
+.gestion-section-title:first-child {
+  margin-top: 0;
+  padding-top: 0;
+  border-top: none;
+}
+
+.gestion-menu button {
+  width: 100%;
+  min-height: 54px;
+  font-size: 18px;
+  text-align: left;
+  padding: 12px 16px;
+}
+
+.settings-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+#gestionDialog .settings-header,
+#gestionDialog .settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+}
+
+#gestionDialog h2 {
+  margin: 0;
+}
+
+#btnCloseGestion {
+  margin-left: auto;
 }
