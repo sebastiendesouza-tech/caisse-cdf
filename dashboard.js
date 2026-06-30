@@ -125,6 +125,14 @@ async function refreshDashboardConnections() {
         }
     }
 
+    const releaseButtonHtml = getDeviceCode() === "A"
+        ? `
+            <button type="button" class="secondary dashboard-small-button" onclick="releaseOtherDevices()">
+                🔓 Libérer caisses inactives
+            </button>
+        `
+        : "";
+
     el.innerHTML = `
         <div class="dashboard-compact-line">
             <span>Supabase</span>
@@ -141,12 +149,9 @@ async function refreshDashboardConnections() {
             <strong>${devicesHtml}</strong>
         </div>
 
-        <button type="button" class="secondary dashboard-small-button" onclick="releaseOtherDevices()">
-            🔓 Libérer caisses inactives
-        </button>
+        ${releaseButtonHtml}
     `;
 }
-
 // -----------------------------------------------------
 // Impression
 // -----------------------------------------------------
