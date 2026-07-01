@@ -140,10 +140,52 @@ function saveConfig() {
   localStorage.setItem('caisse_config', JSON.stringify(config));
   saveConfigToSupabase();
 }
-async function saveSaleToSupabase(sale) {
+const PENDING_SALES_KEY = 'caisse_pending_sales';
+
+function loadPendingSales() {
+  return JSON.parse(localStorage.getItem(PENDING_SALES_KEY) || '[]');
+}
+
+function savePendingSales(list) {
+  localStorage.setItem(PENDING_SALES_KEY, JSON.stringify(list || []));
+}
+
+function addPendingSale(sale) {
+  const pending = loadPendingSales();
+
+  if (!pending.some(s => s.orderNumber === sale.orderNumber)) {
+    pending.push(sale);
+    savePendingSales(pending);
+  }
+}
+
+async function syncPendingSales() {
   if (!supabaseClient) return;
 
-  console.log('Vente enregistrée avec event_id =', currentEventId);
+  const pending = loadPendingSales();
+  if (!pending.length) return;
+
+  const stillPending = [];
+
+  for (const sale of pending) {
+    const ok = await saveSaleToSupabase(sale, true);
+
+    if (!ok) {
+      stillPending.push(sale);
+    }
+  }
+
+  savePendingSales(stillPending);
+
+  if (!stillPending.length) {
+    showToast("✅ Ventes hors ligne synchronisées");
+  }
+}
+async function saveSaleToSupabase(sale, fromPending = false) {
+  if (!supabaseClient) {
+    if (!fromPending) addPendingSale(sale);
+    return false;
+  }
 
   const { error } = await supabaseClient
     .from('sales')
@@ -163,7 +205,16 @@ async function saveSaleToSupabase(sale) {
 
   if (error) {
     console.error('Erreur sauvegarde vente Supabase', error);
+
+    if (!fromPending) {
+      addPendingSale(sale);
+      showToast("⚠️ Vente gardée en local, synchro plus tard");
+    }
+
+    return false;
   }
+
+  return true;
 }
 
 function getDisplayMode() {
@@ -631,6 +682,7 @@ async function initSupabaseSync() {
   await loadConfigFromSupabase();
   await syncOrderNumberFromSupabase();
   await registerDevice();
+  await syncPendingSales();
   heartbeatDevice();
   setInterval(heartbeatDevice, 30000);
   startCentralServices();
@@ -858,6 +910,7 @@ function normalizeConfig(c) {
   c.products.forEach((p, i) => {
     p.id ||= 'p' + (i + 1);
     p.group ||= displayGroup(p.category);
+    p.section ||= 'main';
     p.type ||= 'simple';
     p.components ||= [];
     p.choices ||= [];
@@ -1045,19 +1098,50 @@ function ticketSortIndex(category) {
 
 function renderProducts() {
   console.log('renderProducts eventName =', config.eventName);
+
   const eventTitle = document.getElementById('eventTitle');
   if (eventTitle) eventTitle.textContent = config.eventName || 'Comité des Fêtes';
+
   document.documentElement.style.setProperty('--ticket-color', config.ticketColor);
+
   const wrap = document.getElementById('categories');
   const meat = document.getElementById('meatStock');
-  const groups = {};
-  config.products.forEach(p => (groups[p.group || displayGroup(p.category)] ||= []).push(p));
-  wrap.innerHTML = GROUP_ORDER.map(group => {
-    const products = groups[group] || [];
-    return `<div class="category ${groupClass(group)}"><h3>${group}</h3><div class="product-grid">${products.map(productButtonHtml).join('')}</div></div>`;
-  }).join('');
+
+  const mainProducts = (config.products || []).filter(p => (p.section || 'main') === 'main');
+  const ticketProducts = (config.products || []).filter(p => p.section === 'tickets');
+
+  wrap.innerHTML = `
+    <div class="category group-main">
+      <h3>Buvette / Restauration</h3>
+      <div class="product-grid">
+        ${mainProducts.slice(0, 24).map(productButtonHtml).join('')}
+      </div>
+    </div>
+
+    <div class="category group-tickets">
+      <h3>Billetterie</h3>
+      <div class="product-grid">
+        ${Array.from({ length: 4 }, (_, i) =>
+    productButtonHtml(ticketProducts[i] || {
+      id: 'ticket-empty-' + i,
+      name: '',
+      price: 0,
+      category: 'Billetterie',
+      section: 'tickets',
+      type: 'simple',
+      refundable: true,
+      stock: ''
+    })
+  ).join('')}
+      </div>
+    </div>
+  `;
+
   if (meat) meat.innerHTML = renderMeatStockBox();
-  document.querySelectorAll('.product-btn:not(.empty-product):not(.out-stock)').forEach(btn => btn.addEventListener('click', () => addProduct(btn.dataset.id)));
+
+  document
+    .querySelectorAll('.product-btn:not(.empty-product):not(.out-stock)')
+    .forEach(btn => btn.addEventListener('click', () => addProduct(btn.dataset.id)));
 }
 
 function renderMeatStockBox() {
@@ -3428,6 +3512,8 @@ if (btnToggleDisplayMode) {
     updateDisplayModeButton();
   });
 }
+window.addEventListener('online', syncPendingSales);
+setInterval(syncPendingSales, 30000);
 applyDisplayMode();
 renderProducts();
 renderCart();
